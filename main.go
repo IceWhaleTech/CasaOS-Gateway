@@ -3,37 +3,38 @@ package main
 import (
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
+	"time"
+
+	"github.com/IceWhaleTech/CasaOS-Gateway/route"
+	"golang.org/x/sync/errgroup"
+)
+
+var (
+	g errgroup.Group
 )
 
 func main() {
-	route := map[string]string{
-		"/v1/user": "http://localhost:8080/v1/user",
-	}
-
-	// loop thru the route map
-	for path, upstreamURL := range route {
-		// create a proxy for the upstreamURL
-		target, err := url.Parse(upstreamURL)
-
-		if err != nil {
-			log.Fatal(err)
+	// management server
+	g.Go(func() error {
+		managementServer := &http.Server{
+			Addr:         ":8081",
+			Handler:      route.BuildManagementRouter(),
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
 		}
+		return managementServer.ListenAndServe()
+	})
 
-		proxy := httputil.NewSingleHostReverseProxy(target)
-
-		http.HandleFunc(path, func(w http.ResponseWriter, req *http.Request) {
-			proxy.ServeHTTP(w, req)
+	// gateway server
+	g.Go(func() error {
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			route := r.URL.Path[1:]
+			log.Println("route:", route)
 		})
+		return http.ListenAndServe(":8080", nil)
+	})
 
-		log.Printf("path: %s, upstream: %s", path, upstreamURL)
-	}
-
-	log.Printf("listening on port %s", "3000")
-	err := http.ListenAndServe(":3000", nil)
-
-	if err != nil {
-		panic(err)
+	if err := g.Wait(); err != nil {
+		log.Fatal(err)
 	}
 }
