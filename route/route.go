@@ -58,7 +58,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 				return
 			}
 
-			gateway.Register(request.Route, request.Target)
+			gateway.CreateRoute(request.Route, request.Target)
 
 			ctx.JSON(200, gin.H{})
 		})

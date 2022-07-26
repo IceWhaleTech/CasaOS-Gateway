@@ -10,7 +10,7 @@ func NewManagementService() *management {
 	}
 }
 
-func (g *management) Register(route string, target string) {
+func (g *management) CreateRoute(route string, target string) {
 	g.routes[route] = target
 }
 
