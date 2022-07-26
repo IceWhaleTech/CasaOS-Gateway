@@ -18,7 +18,7 @@ func main() {
 	g.Go(func() error {
 		managementServer := &http.Server{
 			Addr:         ":8081",
-			Handler:      route.BuildManagementRouter(),
+			Handler:      route.Build(),
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
 		}

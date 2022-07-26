@@ -1,0 +1,15 @@
+package service
+
+type management struct {
+	routes map[string]string
+}
+
+func NewManagementService() *management {
+	return &management{
+		routes: make(map[string]string),
+	}
+}
+
+func (g *management) Register(route string, target string) {
+	g.routes[route] = target
+}

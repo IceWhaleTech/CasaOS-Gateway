@@ -1,16 +1,27 @@
 package route
 
 import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
-var gateway = service.NewGateway()
+var gateway = service.NewManagementService()
 
-func BuildManagementRouter() *gin.Engine {
+func Build() *gin.Engine {
 	r := gin.Default()
+
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	r.GET("/ping", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 
 	buildV1Group(r)
 
@@ -19,21 +30,33 @@ func BuildManagementRouter() *gin.Engine {
 
 func buildV1Group(r *gin.Engine) {
 	v1Group := r.Group("/v1")
-	buildV1GatewayGroup(v1Group)
+
+	v1Group.Use()
+	{
+		buildV1RouteGroup(v1Group)
+	}
 }
 
-func buildV1GatewayGroup(v1Group *gin.RouterGroup) {
-	v1GatewayGroup := v1Group.Group("/gateway")
+func buildV1RouteGroup(v1Group *gin.RouterGroup) {
+	v1RoutesGroup := v1Group.Group("/routes")
 
-	v1GatewayGroup.POST("/routes", func(ctx *gin.Context) {
-		json := make(map[string]interface{})
-		ctx.BindJSON(&json)
+	v1RoutesGroup.Use()
+	{
+		v1RoutesGroup.POST("/", func(ctx *gin.Context) {
+			decoder := json.NewDecoder(ctx.Request.Body)
 
-		route := json["route"].(string)
-		target := json["target"].(string)
+			var request common.CreateRouteRequest
+			err := decoder.Decode(&request)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
 
-		gateway.Register(route, target)
+			gateway.Register(request.Route, request.Target)
 
-		ctx.JSON(200, gin.H{})
-	})
+			ctx.JSON(200, gin.H{})
+		})
+	}
 }
