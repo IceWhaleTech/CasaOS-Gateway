@@ -42,7 +42,11 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 
 	v1RoutesGroup.Use()
 	{
-		v1RoutesGroup.POST("/", func(ctx *gin.Context) {
+		v1RoutesGroup.GET("", func(ctx *gin.Context) {
+			ctx.JSON(200, gateway.GetRoutes())
+		})
+
+		v1RoutesGroup.POST("", func(ctx *gin.Context) {
 			decoder := json.NewDecoder(ctx.Request.Body)
 
 			var request common.CreateRouteRequest

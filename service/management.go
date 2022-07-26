@@ -13,3 +13,7 @@ func NewManagementService() *management {
 func (g *management) Register(route string, target string) {
 	g.routes[route] = target
 }
+
+func (g *management) GetRoutes() map[string]string {
+	return g.routes
+}

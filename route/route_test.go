@@ -23,6 +23,18 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestGetRoutes(t *testing.T) {
+	router := Build()
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest(http.MethodGet, "/v1/routes", nil)
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestCreateRoute(t *testing.T) {
 	router := Build()
 
