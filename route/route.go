@@ -19,7 +19,7 @@ func Build(management *service.Management) *gin.Engine {
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
+		ctx.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
@@ -44,7 +44,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 	v1RoutesGroup.Use()
 	{
 		v1RoutesGroup.GET("", func(ctx *gin.Context) {
-			ctx.JSON(200, _management.GetRoutes())
+			ctx.JSON(http.StatusOK, _management.GetRoutes())
 		})
 
 		v1RoutesGroup.POST("", func(ctx *gin.Context) {
@@ -57,7 +57,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 
 			_management.CreateRoute(route.Path, route.Target)
 
-			ctx.JSON(200, route)
+			ctx.Status(http.StatusCreated)
 		})
 	}
 }

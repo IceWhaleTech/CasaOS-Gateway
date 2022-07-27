@@ -1,23 +1,38 @@
 package service
 
+import (
+	"log"
+	"net/http/httputil"
+	"net/url"
+)
+
 type Management struct {
-	routes map[string]string
+	pathTargetMap       map[string]string
+	pathReverseProxyMap map[string]*httputil.ReverseProxy
 }
 
 func NewManagementService() *Management {
 	return &Management{
-		routes: make(map[string]string),
+		pathTargetMap:       make(map[string]string),
+		pathReverseProxyMap: make(map[string]*httputil.ReverseProxy),
 	}
 }
 
 func (g *Management) CreateRoute(route string, target string) {
-	g.routes[route] = target
+	url, err := url.Parse(target)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	g.pathTargetMap[route] = target
+	g.pathReverseProxyMap[route] = httputil.NewSingleHostReverseProxy(url)
 }
 
 func (g *Management) GetRoutes() map[string]string {
-	return g.routes
+	return g.pathTargetMap
 }
 
-func (g *Management) GetRoute(route string) string {
-	return g.routes[route]
+func (g *Management) GetProxy(route string) *httputil.ReverseProxy {
+	return g.pathReverseProxyMap[route]
 }
