@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http/httputil"
 	"net/url"
+
+	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 )
 
 type Management struct {
@@ -18,19 +20,28 @@ func NewManagementService() *Management {
 	}
 }
 
-func (g *Management) CreateRoute(route string, target string) {
-	url, err := url.Parse(target)
+func (g *Management) CreateRoute(route *common.Route) {
+	url, err := url.Parse(route.Target)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	g.pathTargetMap[route] = target
-	g.pathReverseProxyMap[route] = httputil.NewSingleHostReverseProxy(url)
+	g.pathTargetMap[route.Path] = route.Target
+	g.pathReverseProxyMap[route.Path] = httputil.NewSingleHostReverseProxy(url)
 }
 
-func (g *Management) GetRoutes() map[string]string {
-	return g.pathTargetMap
+func (g *Management) GetRoutes() []*common.Route {
+	routes := make([]*common.Route, 0)
+
+	for path, target := range g.pathTargetMap {
+		routes = append(routes, &common.Route{
+			Path:   path,
+			Target: target,
+		})
+	}
+
+	return routes
 }
 
 func (g *Management) GetProxy(route string) *httputil.ReverseProxy {

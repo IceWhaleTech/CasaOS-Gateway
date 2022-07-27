@@ -61,7 +61,7 @@ func TestCreateRoute(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var routes map[string]string
+	var routes []*common.Route
 
 	decoder := json.NewDecoder(w.Body)
 
@@ -70,4 +70,8 @@ func TestCreateRoute(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	assert.Equal(t, 1, len(routes))
+	assert.Equal(t, route.Path, routes[0].Path)
+	assert.Equal(t, route.Target, routes[0].Target)
 }

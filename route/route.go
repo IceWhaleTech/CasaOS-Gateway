@@ -56,14 +56,14 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 		})
 
 		v1RoutesGroup.POST("", func(ctx *gin.Context) {
-			var route common.Route
+			var route *common.Route
 			err := ctx.ShouldBindJSON(&route)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err.Error())
 				return
 			}
 
-			_management.CreateRoute(route.Path, route.Target)
+			_management.CreateRoute(route)
 
 			ctx.Status(http.StatusCreated)
 		})
