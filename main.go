@@ -133,6 +133,6 @@ func serve(name string, addr string, route *gin.Engine) error {
 		panic(err)
 	}
 
-	log.Printf("%s server listening on %s (saved to %s)", name, listener.Addr().String(), addressFilePath)
+	log.Printf("%s service listening on %s (saved to %s)", name, listener.Addr().String(), addressFilePath)
 	return http.Serve(listener, route)
 }
