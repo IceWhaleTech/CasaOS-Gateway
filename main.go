@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"path/filepath"
 
+	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,13 @@ func main() {
 		panic(err)
 	}
 
+	pidFilename, err := writePidFile()
+	if err != nil {
+		panic(err)
+	}
+
+	defer cleanupFiles(pidFilename, common.GATEWAY_URL_FILENAME, common.MANAGEMENT_URL_FILENAME)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
 	signal.Notify(kill)
@@ -47,7 +55,7 @@ func main() {
 	)
 
 	if err := app.Start(ctx); err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 }
 
@@ -59,7 +67,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 
 				// management server
 				g.Go(func() error {
-					return serve("management", "127.1:0", route)
+					return serve(common.MANAGEMENT_URL_FILENAME, "127.0.0.1:0", route)
 				})
 
 				// gateway server
@@ -72,12 +80,20 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 					port := viper.GetString("gateway.Port")
 					addr := net.JoinHostPort("", port)
 
-					return serve("gateway", addr, route)
+					return serve(common.GATEWAY_URL_FILENAME, addr, route)
 				})
 
 				return g.Wait()
 			},
 		})
+}
+
+func writePidFile() (string, error) {
+	path := viper.GetString("common.RuntimeVariablesPath")
+
+	filename := "gateway.pid"
+	filepath := filepath.Join(path, filename)
+	return filename, ioutil.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0644)
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
@@ -90,6 +106,17 @@ func writeAddressFile(filename string, address string) (string, error) {
 
 	filepath := filepath.Join(path, filename)
 	return filepath, ioutil.WriteFile(filepath, []byte(address), 0644)
+}
+
+func cleanupFiles(filenames ...string) {
+	runtimeVariablesPath := viper.GetString("common.RuntimeVariablesPath")
+
+	for _, filename := range filenames {
+		err := os.Remove(filepath.Join(runtimeVariablesPath, filename))
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
 
 func checkPrequisites() error {
@@ -122,17 +149,20 @@ func loadConfig() error {
 	return viper.ReadInConfig()
 }
 
-func serve(name string, addr string, route *gin.Engine) error {
+func serve(urlFilename string, addr string, route *gin.Engine) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
 	}
 
-	addressFilePath, err := writeAddressFile(name+".address", listener.Addr().String())
+	url := "http://" + listener.Addr().String()
+
+	urlFilePath, err := writeAddressFile(urlFilename, url)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	log.Printf("%s service listening on %s (saved to %s)", name, listener.Addr().String(), addressFilePath)
+	log.Printf("listening on %s (saved to %s)", url, urlFilePath)
+
 	return http.Serve(listener, route)
 }

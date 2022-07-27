@@ -32,10 +32,10 @@ port=80
 Once running, gateway address and management address will be available in the files under `RuntimeVariablesPath`  specified in configuration.
 
 ```bash
-$ cat /var/run/casaos/gateway.address 
+$ cat /var/run/casaos/gateway.url 
 [::]:8080 # port is specified in configuration
 
-$ cat /var/run/casaos/management.address 
+$ cat /var/run/casaos/management.url 
 [::]:34703 # port is randomly assigned
 ```
 
