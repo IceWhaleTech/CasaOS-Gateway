@@ -59,7 +59,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 
 				// management server
 				g.Go(func() error {
-					return serve("management", ":0", route)
+					return serve("management", "127.1:0", route)
 				})
 
 				// gateway server
