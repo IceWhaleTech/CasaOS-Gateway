@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -25,8 +26,10 @@ func main() {
 		panic(err)
 	}
 
-	settings := viper.AllSettings()
-	log.Println("settings:", settings)
+	err = checkPrequisites()
+	if err != nil {
+		panic(err)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
@@ -78,7 +81,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 }
 
 func writeAddressFile(filename string, address string) error {
-	path := viper.GetString("gateway.run-path")
+	path := viper.GetString("gateway.runtime-data-path")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
@@ -89,16 +92,32 @@ func writeAddressFile(filename string, address string) error {
 	return ioutil.WriteFile(filepath, []byte(address), 0644)
 }
 
+func checkPrequisites() error {
+	path := viper.GetString("gateway.runtime-data-path")
+
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		return fmt.Errorf("please ensure the owner of this service has write permission to that path %s", path)
+	}
+
+	return nil
+}
+
 func loadConfig() error {
 	viper.SetDefault("gateway.port", "8080")
-	viper.SetDefault("gateway.run-path", "/var/run/casaos")
+	viper.SetDefault("gateway.runtime-data-path", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
 	viper.SetConfigType("ini")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./conf")
-	viper.AddConfigPath("$HOME/.casaos")
-	viper.AddConfigPath("/etc/casaos")
+
+	currentDirectory, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+
+	viper.AddConfigPath(currentDirectory)
+	viper.AddConfigPath(filepath.Join(currentDirectory, "conf"))
+	viper.AddConfigPath(filepath.Join("/", "etc", "casaos"))
 
 	return viper.ReadInConfig()
 }

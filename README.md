@@ -16,12 +16,12 @@ Default configurations are:
 ```ini
 [gateway]
 port=8080
-run-path=/var/run/casaos
+runtime-data-path=/var/run/casaos # See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 ```
 
 ## Running
 
-Once running, gateway address and management address will be available in the files under `run-path`  specified in configuration.
+Once running, gateway address and management address will be available in the files under `runtime-data-path`  specified in configuration.
 
 ```bash
 $ cat /var/run/casaos/gateway.address 
