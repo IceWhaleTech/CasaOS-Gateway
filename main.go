@@ -2,20 +2,32 @@ package main
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"time"
+	"path/filepath"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"go.uber.org/fx"
 	"golang.org/x/sync/errgroup"
 )
 
 func main() {
+
+	err := loadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	settings := viper.AllSettings()
+	log.Println("settings:", settings)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
 	signal.Notify(kill)
@@ -44,13 +56,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 
 				// management server
 				g.Go(func() error {
-					managementServer := &http.Server{
-						Addr:         ":8081",
-						Handler:      route,
-						ReadTimeout:  10 * time.Second,
-						WriteTimeout: 10 * time.Second,
-					}
-					return managementServer.ListenAndServe()
+					return serve("management", ":0", route)
 				})
 
 				// gateway server
@@ -59,10 +65,55 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 						proxy := management.GetProxy(r.URL.Path)
 						proxy.ServeHTTP(w, r)
 					})
-					return http.ListenAndServe(":8080", nil)
+
+					port := viper.GetString("gateway.port")
+					addr := net.JoinHostPort("", port)
+
+					return serve("gateway", addr, route)
 				})
 
 				return g.Wait()
 			},
 		})
+}
+
+func writeAddressFile(filename string, address string) error {
+	path := viper.GetString("gateway.run-path")
+
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		return err
+	}
+
+	filepath := filepath.Join(path, filename)
+	return ioutil.WriteFile(filepath, []byte(address), 0644)
+}
+
+func loadConfig() error {
+	viper.SetDefault("gateway.port", "8080")
+	viper.SetDefault("gateway.run-path", "/var/run/casaos")
+
+	viper.SetConfigName("gateway")
+	viper.SetConfigType("ini")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("./conf")
+	viper.AddConfigPath("$HOME/.casaos")
+	viper.AddConfigPath("/etc/casaos")
+
+	return viper.ReadInConfig()
+}
+
+func serve(name string, addr string, route *gin.Engine) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+
+	err = writeAddressFile(name+".address", listener.Addr().String())
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println(name+" server listening on", listener.Addr().String())
+	return http.Serve(listener, route)
 }

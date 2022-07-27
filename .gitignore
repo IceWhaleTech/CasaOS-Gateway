@@ -21,6 +21,8 @@
 go.work
 
 
+conf/
+
 # IDE
 .vscode/
 __debug_bin
