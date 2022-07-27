@@ -69,7 +69,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 						proxy.ServeHTTP(w, r)
 					})
 
-					port := viper.GetString("gateway.port")
+					port := viper.GetString("gateway.Port")
 					addr := net.JoinHostPort("", port)
 
 					return serve("gateway", addr, route)
@@ -80,20 +80,20 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 		})
 }
 
-func writeAddressFile(filename string, address string) error {
-	path := viper.GetString("common.runtime-data-path")
+func writeAddressFile(filename string, address string) (string, error) {
+	path := viper.GetString("common.RuntimeVariablesPath")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	filepath := filepath.Join(path, filename)
-	return ioutil.WriteFile(filepath, []byte(address), 0644)
+	return filepath, ioutil.WriteFile(filepath, []byte(address), 0644)
 }
 
 func checkPrequisites() error {
-	path := viper.GetString("common.runtime-data-path")
+	path := viper.GetString("common.RuntimeVariablesPath")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
@@ -104,8 +104,8 @@ func checkPrequisites() error {
 }
 
 func loadConfig() error {
-	viper.SetDefault("gateway.port", "8080")
-	viper.SetDefault("common.runtime-data-path", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+	viper.SetDefault("gateway.Port", "8080")
+	viper.SetDefault("common.RuntimeVariablesPath", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
 	viper.SetConfigType("ini")
@@ -128,11 +128,11 @@ func serve(name string, addr string, route *gin.Engine) error {
 		panic(err)
 	}
 
-	err = writeAddressFile(name+".address", listener.Addr().String())
+	addressFilePath, err := writeAddressFile(name+".address", listener.Addr().String())
 	if err != nil {
 		panic(err)
 	}
 
-	log.Println(name+" server listening on", listener.Addr().String())
+	log.Printf("%s server listening on %s (saved to %s)", name, listener.Addr().String(), addressFilePath)
 	return http.Serve(listener, route)
 }
