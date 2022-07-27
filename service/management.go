@@ -1,19 +1,23 @@
 package service
 
-type management struct {
+type Management struct {
 	routes map[string]string
 }
 
-func NewManagementService() *management {
-	return &management{
+func NewManagementService() *Management {
+	return &Management{
 		routes: make(map[string]string),
 	}
 }
 
-func (g *management) CreateRoute(route string, target string) {
+func (g *Management) CreateRoute(route string, target string) {
 	g.routes[route] = target
 }
 
-func (g *management) GetRoutes() map[string]string {
+func (g *Management) GetRoutes() map[string]string {
 	return g.routes
+}
+
+func (g *Management) GetRoute(route string) string {
+	return g.routes[route]
 }

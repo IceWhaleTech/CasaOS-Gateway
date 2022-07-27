@@ -1,7 +1,6 @@
 package route
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
@@ -10,9 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var gateway = service.NewManagementService()
+var _management *service.Management
 
-func Build() *gin.Engine {
+func Build(management *service.Management) *gin.Engine {
+	_management = management
+
 	r := gin.Default()
 
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -43,24 +44,20 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 	v1RoutesGroup.Use()
 	{
 		v1RoutesGroup.GET("", func(ctx *gin.Context) {
-			ctx.JSON(200, gateway.GetRoutes())
+			ctx.JSON(200, _management.GetRoutes())
 		})
 
 		v1RoutesGroup.POST("", func(ctx *gin.Context) {
-			decoder := json.NewDecoder(ctx.Request.Body)
-
-			var request common.CreateRouteRequest
-			err := decoder.Decode(&request)
+			var route common.Route
+			err := ctx.ShouldBindJSON(&route)
 			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{
-					"error": err.Error(),
-				})
+				ctx.JSON(http.StatusBadRequest, err.Error())
 				return
 			}
 
-			gateway.CreateRoute(request.Route, request.Target)
+			_management.CreateRoute(route.Path, route.Target)
 
-			ctx.JSON(200, gin.H{})
+			ctx.JSON(200, route)
 		})
 	}
 }

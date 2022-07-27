@@ -1,6 +1,6 @@
 package common
 
-type CreateRouteRequest struct {
-	Route  string `json:"route"`
-	Target string `json:"target"`
+type Route struct {
+	Path   string `json:"path" binding:"required"`
+	Target string `json:"target" binding:"required"`
 }
