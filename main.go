@@ -56,12 +56,8 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 				// gateway server
 				g.Go(func() error {
 					http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-						path := r.URL.Path[1:]
-						proxy := management.GetProxy(path)
-
-						http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-							proxy.ServeHTTP(w, r)
-						})
+						proxy := management.GetProxy(r.URL.Path)
+						proxy.ServeHTTP(w, r)
 					})
 					return http.ListenAndServe(":8080", nil)
 				})
