@@ -2,6 +2,7 @@ package route
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
@@ -13,6 +14,13 @@ var _management *service.Management
 
 func Build(management *service.Management) *gin.Engine {
 	_management = management
+
+	// check if environment variable is set
+	if ginMode, success := os.LookupEnv("GIN_MODE"); success {
+		gin.SetMode(ginMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	r := gin.Default()
 

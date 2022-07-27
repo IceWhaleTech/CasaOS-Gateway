@@ -14,9 +14,11 @@ $HOME/.casaos/gateway.ini
 Default configurations are:
 
 ```ini
-[gateway]
-port=8080
+[common]
 runtime-data-path=/var/run/casaos # See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+
+[gateway]
+port=80
 ```
 
 ## Running

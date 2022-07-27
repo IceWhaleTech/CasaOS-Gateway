@@ -81,7 +81,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 }
 
 func writeAddressFile(filename string, address string) error {
-	path := viper.GetString("gateway.runtime-data-path")
+	path := viper.GetString("common.runtime-data-path")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
@@ -93,7 +93,7 @@ func writeAddressFile(filename string, address string) error {
 }
 
 func checkPrequisites() error {
-	path := viper.GetString("gateway.runtime-data-path")
+	path := viper.GetString("common.runtime-data-path")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
@@ -105,7 +105,7 @@ func checkPrequisites() error {
 
 func loadConfig() error {
 	viper.SetDefault("gateway.port", "8080")
-	viper.SetDefault("gateway.runtime-data-path", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+	viper.SetDefault("common.runtime-data-path", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
 	viper.SetConfigType("ini")
