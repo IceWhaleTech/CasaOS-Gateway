@@ -23,6 +23,7 @@ type Route struct {
 }
 
 type ManagementService interface {
+	CreateRoute(route *Route) error
 }
 
 type managementService struct {
