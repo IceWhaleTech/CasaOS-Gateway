@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 )
@@ -44,6 +45,11 @@ func (g *Management) GetRoutes() []*common.Route {
 	return routes
 }
 
-func (g *Management) GetProxy(route string) *httputil.ReverseProxy {
-	return g.pathReverseProxyMap[route]
+func (g *Management) GetProxy(path string) *httputil.ReverseProxy {
+	for p, proxy := range g.pathReverseProxyMap {
+		if strings.HasPrefix(path, p) {
+			return proxy
+		}
+	}
+	return nil
 }

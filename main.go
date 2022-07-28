@@ -50,7 +50,7 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(service.NewManagementService),
-		fx.Provide(route.Build),
+		fx.Provide(route.NewRoutes),
 		fx.Invoke(run),
 	)
 
@@ -72,15 +72,22 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 
 				// gateway server
 				g.Go(func() error {
-					http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+					gatewayMux := http.NewServeMux()
+					gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 						proxy := management.GetProxy(r.URL.Path)
+
+						if proxy == nil {
+							w.WriteHeader(http.StatusNotFound)
+							return
+						}
+
 						proxy.ServeHTTP(w, r)
 					})
 
 					port := viper.GetString("gateway.Port")
 					addr := net.JoinHostPort("", port)
 
-					return serve(common.GATEWAY_URL_FILENAME, addr, route)
+					return serve(common.GATEWAY_URL_FILENAME, addr, gatewayMux)
 				})
 
 				return g.Wait()
@@ -153,7 +160,7 @@ func loadConfig() error {
 	return viper.ReadInConfig()
 }
 
-func serve(urlFilename string, addr string, route *gin.Engine) error {
+func serve(urlFilename string, addr string, route http.Handler) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
@@ -168,5 +175,9 @@ func serve(urlFilename string, addr string, route *gin.Engine) error {
 
 	log.Printf("listening on %s (saved to %s)", url, urlFilePath)
 
-	return http.Serve(listener, route)
+	s := &http.Server{
+		Handler: route,
+	}
+
+	return s.Serve(listener)
 }

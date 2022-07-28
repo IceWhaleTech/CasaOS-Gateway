@@ -17,7 +17,7 @@ var router *gin.Engine
 
 func setup(t *testing.T) func(t *testing.T) {
 	management := service.NewManagementService()
-	router = Build(management)
+	router = NewRoutes(management)
 
 	return func(t *testing.T) {
 		management = nil

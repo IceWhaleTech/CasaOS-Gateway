@@ -12,7 +12,7 @@ import (
 
 var _management *service.Management
 
-func Build(management *service.Management) *gin.Engine {
+func NewRoutes(management *service.Management) *gin.Engine {
 	_management = management
 
 	// check if environment variable is set
