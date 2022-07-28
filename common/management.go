@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"path"
 	"path/filepath"
+	"strings"
 )
 
 const MANAGEMENT_URL_FILENAME = "management.url"
@@ -31,7 +31,7 @@ type managementService struct {
 }
 
 func (m *managementService) CreateRoute(route *Route) error {
-	url := path.Join(m.address, API_PATH)
+	url := strings.TrimSuffix(m.address, "/") + "/" + strings.TrimPrefix(API_PATH, "/")
 	body, err := json.Marshal(route)
 	if err != nil {
 		return err
