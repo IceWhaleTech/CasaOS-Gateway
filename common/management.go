@@ -49,9 +49,9 @@ func (m *managementService) CreateRoute(route *Route) error {
 	return nil
 }
 
-func NewManagementService(runtimeVariablesPath string) (ManagementService, error) {
+func NewManagementService(RuntimePath string) (ManagementService, error) {
 
-	managementAddresFile := filepath.Join(runtimeVariablesPath, MANAGEMENT_URL_FILENAME)
+	managementAddresFile := filepath.Join(RuntimePath, MANAGEMENT_URL_FILENAME)
 
 	buf, err := ioutil.ReadFile(managementAddresFile)
 	if err != nil {

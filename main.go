@@ -89,7 +89,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 }
 
 func writePidFile() (string, error) {
-	path := viper.GetString("common.RuntimeVariablesPath")
+	path := viper.GetString("common.RuntimePath")
 
 	filename := "gateway.pid"
 	filepath := filepath.Join(path, filename)
@@ -97,7 +97,7 @@ func writePidFile() (string, error) {
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
-	path := viper.GetString("common.RuntimeVariablesPath")
+	path := viper.GetString("common.RuntimePath")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
@@ -109,10 +109,10 @@ func writeAddressFile(filename string, address string) (string, error) {
 }
 
 func cleanupFiles(filenames ...string) {
-	runtimeVariablesPath := viper.GetString("common.RuntimeVariablesPath")
+	RuntimePath := viper.GetString("common.RuntimePath")
 
 	for _, filename := range filenames {
-		err := os.Remove(filepath.Join(runtimeVariablesPath, filename))
+		err := os.Remove(filepath.Join(RuntimePath, filename))
 		if err != nil {
 			log.Println(err)
 		}
@@ -120,7 +120,7 @@ func cleanupFiles(filenames ...string) {
 }
 
 func checkPrequisites() error {
-	path := viper.GetString("common.RuntimeVariablesPath")
+	path := viper.GetString("common.RuntimePath")
 
 	err := os.MkdirAll(path, 0755)
 	if err != nil {
@@ -132,7 +132,7 @@ func checkPrequisites() error {
 
 func loadConfig() error {
 	viper.SetDefault("gateway.Port", "8080")
-	viper.SetDefault("common.RuntimeVariablesPath", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+	viper.SetDefault("common.RuntimePath", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
 	viper.SetConfigType("ini")
@@ -140,6 +140,10 @@ func loadConfig() error {
 	currentDirectory, err := os.Getwd()
 	if err != nil {
 		log.Println(err)
+	}
+
+	if configPath, success := os.LookupEnv("CASAOS_CONFIG_PATH"); success {
+		viper.AddConfigPath(configPath)
 	}
 
 	viper.AddConfigPath(currentDirectory)

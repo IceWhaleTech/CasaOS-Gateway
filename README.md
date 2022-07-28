@@ -21,7 +21,7 @@ Default configurations are:
 
 ```ini
 [common]
-RuntimeVariablesPath=/var/run/casaos # See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+RuntimePath=/var/run/casaos # See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 [gateway]
 port=80
@@ -29,7 +29,7 @@ port=80
 
 ## Running
 
-Once running, gateway address and management address will be available in the files under `RuntimeVariablesPath`  specified in configuration.
+Once running, gateway address and management address will be available in the files under `RuntimePath`  specified in configuration.
 
 ```bash
 $ cat /var/run/casaos/gateway.url 
