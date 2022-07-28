@@ -21,6 +21,11 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	ConfigKeyGatewayPort = "gateway.Port"
+	ConfigKeyRuntimePath = "common.RuntimePath"
+)
+
 func main() {
 	err := loadConfig()
 	if err != nil {
@@ -37,7 +42,12 @@ func main() {
 		panic(err)
 	}
 
-	defer cleanupFiles(pidFilename, common.GatewayURLFilename, common.ManagementURLFilename)
+	defer cleanupFiles(
+		pidFilename,
+		service.RoutesFile,
+		common.GatewayURLFilename,
+		common.ManagementURLFilename,
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
@@ -84,7 +94,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 						proxy.ServeHTTP(w, r)
 					})
 
-					port := viper.GetString("gateway.Port")
+					port := viper.GetString(ConfigKeyGatewayPort)
 					addr := net.JoinHostPort("", port)
 
 					return serve(common.GatewayURLFilename, addr, gatewayMux)
@@ -96,15 +106,15 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 }
 
 func writePidFile() (string, error) {
-	path := viper.GetString("common.RuntimePath")
+	runtimePath := viper.GetString(ConfigKeyRuntimePath)
 
 	filename := "gateway.pid"
-	filepath := filepath.Join(path, filename)
+	filepath := filepath.Join(runtimePath, filename)
 	return filename, ioutil.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0o600)
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
-	path := viper.GetString("common.RuntimePath")
+	path := viper.GetString(ConfigKeyRuntimePath)
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {
@@ -116,7 +126,7 @@ func writeAddressFile(filename string, address string) (string, error) {
 }
 
 func cleanupFiles(filenames ...string) {
-	RuntimePath := viper.GetString("common.RuntimePath")
+	RuntimePath := viper.GetString(ConfigKeyRuntimePath)
 
 	for _, filename := range filenames {
 		err := os.Remove(filepath.Join(RuntimePath, filename))
@@ -127,7 +137,7 @@ func cleanupFiles(filenames ...string) {
 }
 
 func checkPrequisites() error {
-	path := viper.GetString("common.RuntimePath")
+	path := viper.GetString(ConfigKeyRuntimePath)
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {
@@ -138,8 +148,8 @@ func checkPrequisites() error {
 }
 
 func loadConfig() error {
-	viper.SetDefault("gateway.Port", "8080")
-	viper.SetDefault("common.RuntimePath", "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+	viper.SetDefault(ConfigKeyGatewayPort, "8080")
+	viper.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
 	viper.SetConfigType("ini")

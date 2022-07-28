@@ -10,6 +10,7 @@ require (
 	github.com/spf13/viper v1.12.0
 	go.uber.org/fx v1.17.1
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	gotest.tools v2.2.0+incompatible
 )
 
 require (
@@ -28,6 +29,7 @@ require (
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/golang/geo v0.0.0-20200319012246-673a6f80352d // indirect
 	github.com/golang/snappy v0.0.2 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
@@ -43,6 +45,7 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pierrec/lz4/v4 v4.1.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

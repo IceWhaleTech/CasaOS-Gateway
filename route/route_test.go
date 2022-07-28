@@ -3,8 +3,10 @@ package route
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
@@ -16,12 +18,14 @@ import (
 var router *gin.Engine
 
 func setup(t *testing.T) func(t *testing.T) {
-	management := service.NewManagementService()
+	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
+	management := service.NewManagementService(tmpdir)
 	router = NewRoutes(management)
 
 	return func(t *testing.T) {
 		management = nil
 		router = nil
+		os.RemoveAll(tmpdir)
 	}
 }
 
