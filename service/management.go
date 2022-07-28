@@ -23,7 +23,6 @@ func NewManagementService() *Management {
 
 func (g *Management) CreateRoute(route *common.Route) {
 	url, err := url.Parse(route.Target)
-
 	if err != nil {
 		log.Fatalln(err)
 	}

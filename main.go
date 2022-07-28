@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
@@ -21,7 +22,6 @@ import (
 )
 
 func main() {
-
 	err := loadConfig()
 	if err != nil {
 		panic(err)
@@ -37,7 +37,7 @@ func main() {
 		panic(err)
 	}
 
-	defer cleanupFiles(pidFilename, common.GATEWAY_URL_FILENAME, common.MANAGEMENT_URL_FILENAME)
+	defer cleanupFiles(pidFilename, common.GatewayURLFilename, common.ManagementURLFilename)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
@@ -67,7 +67,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 
 				// management server
 				g.Go(func() error {
-					return serve(common.MANAGEMENT_URL_FILENAME, "127.0.0.1:0", route)
+					return serve(common.ManagementURLFilename, "127.0.0.1:0", route)
 				})
 
 				// gateway server
@@ -87,7 +87,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 					port := viper.GetString("gateway.Port")
 					addr := net.JoinHostPort("", port)
 
-					return serve(common.GATEWAY_URL_FILENAME, addr, gatewayMux)
+					return serve(common.GatewayURLFilename, addr, gatewayMux)
 				})
 
 				return g.Wait()
@@ -100,19 +100,19 @@ func writePidFile() (string, error) {
 
 	filename := "gateway.pid"
 	filepath := filepath.Join(path, filename)
-	return filename, ioutil.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0644)
+	return filename, ioutil.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0o600)
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
 	path := viper.GetString("common.RuntimePath")
 
-	err := os.MkdirAll(path, 0755)
+	err := os.MkdirAll(path, 0o755)
 	if err != nil {
 		return "", err
 	}
 
 	filepath := filepath.Join(path, filename)
-	return filepath, ioutil.WriteFile(filepath, []byte(address), 0644)
+	return filepath, ioutil.WriteFile(filepath, []byte(address), 0o600)
 }
 
 func cleanupFiles(filenames ...string) {
@@ -129,7 +129,7 @@ func cleanupFiles(filenames ...string) {
 func checkPrequisites() error {
 	path := viper.GetString("common.RuntimePath")
 
-	err := os.MkdirAll(path, 0755)
+	err := os.MkdirAll(path, 0o755)
 	if err != nil {
 		return fmt.Errorf("please ensure the owner of this service has write permission to that path %s", path)
 	}
@@ -176,7 +176,8 @@ func serve(urlFilename string, addr string, route http.Handler) error {
 	log.Printf("listening on %s (saved to %s)", url, urlFilePath)
 
 	s := &http.Server{
-		Handler: route,
+		Handler:           route,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	return s.Serve(listener)

@@ -12,10 +12,12 @@ import (
 	"strings"
 )
 
-const MANAGEMENT_URL_FILENAME = "management.url"
-const GATEWAY_URL_FILENAME = "gateway.url"
+const (
+	ManagementURLFilename = "management.url"
+	GatewayURLFilename    = "gateway.url"
+)
 
-const API_PATH = "/v1/routes"
+const APIPath = "/v1/routes"
 
 type Route struct {
 	Path   string `json:"path" binding:"required"`
@@ -31,13 +33,13 @@ type managementService struct {
 }
 
 func (m *managementService) CreateRoute(route *Route) error {
-	url := strings.TrimSuffix(m.address, "/") + "/" + strings.TrimPrefix(API_PATH, "/")
+	url := strings.TrimSuffix(m.address, "/") + "/" + strings.TrimPrefix(APIPath, "/")
 	body, err := json.Marshal(route)
 	if err != nil {
 		return err
 	}
 
-	response, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	response, err := http.Post(url, "application/json", bytes.NewBuffer(body)) //nolint:gosec
 	if err != nil {
 		return err
 	}
@@ -50,8 +52,7 @@ func (m *managementService) CreateRoute(route *Route) error {
 }
 
 func NewManagementService(RuntimePath string) (ManagementService, error) {
-
-	managementAddresFile := filepath.Join(RuntimePath, MANAGEMENT_URL_FILENAME)
+	managementAddresFile := filepath.Join(RuntimePath, ManagementURLFilename)
 
 	buf, err := ioutil.ReadFile(managementAddresFile)
 	if err != nil {

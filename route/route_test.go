@@ -46,7 +46,6 @@ func TestCreateRoute(t *testing.T) {
 	}
 
 	body, err := json.Marshal(route)
-
 	if err != nil {
 		t.Error(err)
 	}
