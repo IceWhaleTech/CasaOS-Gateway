@@ -6,3 +6,5 @@ ConditionFileNotEmpty=/etc/casaos/gateway.ini
 [Service]
 EnvironmentFile=/etc/default/casaos-gateway
 ExecStart=/usr/local/bin/
+
+# See https://blog.devgenius.io/write-systemd-service-file-in-linux-centos-and-ubuntu-6accf1dc1109
