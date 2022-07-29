@@ -1,0 +1,8 @@
+[Unit]
+Description=CasaOS Gateway
+After=network.target
+ConditionFileNotEmpty=/etc/casaos/gateway.ini
+
+[Service]
+EnvironmentFile=/etc/default/casaos-gateway
+ExecStart=/usr/local/bin/
