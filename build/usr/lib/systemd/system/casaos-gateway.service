@@ -1,0 +1,13 @@
+[Unit]
+After=network.target
+ConditionFileNotEmpty=/etc/casaos/gateway.ini
+Description=CasaOS Gateway
+
+[Service]
+EnvironmentFile=/etc/default/casaos/gateway
+ExecStart=/usr/bin/casaos-gateway
+PIDFile=/var/run/casaos/gateway.pid
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
