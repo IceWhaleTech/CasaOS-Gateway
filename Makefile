@@ -1,21 +1,22 @@
 TARGET_DIR = target
 BUILD_DIR = $(TARGET_DIR)/build
-BIN_DIR = usr/bin
 
 INSTALL_ROOT = /
 
 casaos-gateway: clean
-	mkdir -pv $(BUILD_DIR)/$(BIN_DIR)
+	mkdir -pv $(BUILD_DIR)/usr/bin
+	go build -v -o $(BUILD_DIR)/usr/bin/casaos-gateway
 	cp -rv build $(TARGET_DIR)
-	go build -v -o $(BUILD_DIR)/$(BIN_DIR)/casaos-gateway
 
 clean:
 	rm -rfv $(TARGET_DIR)
 
 install:
 	cp -rv $(BUILD_DIR)/* $(INSTALL_ROOT)
+	systemctl enable --now casaos-gateway.service
 
 uninstall:
-	rm -v /etc/casaos/gateway.ini
-	rm -v /usr/bin/casaos-gateway
-	rm -v /usr/lib/systemd/system/casaos-gateway.service
+	systemctl disable --now casaos-gateway.service
+	rm -v $(INSTALL_ROOT)/etc/casaos/gateway.ini
+	rm -v $(INSTALL_ROOT)/usr/bin/casaos-gateway
+	rm -v $(INSTALL_ROOT)/usr/lib/systemd/system/casaos-gateway.service

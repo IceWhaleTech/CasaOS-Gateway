@@ -59,7 +59,9 @@ func main() {
 	}()
 
 	app := fx.New(
-		fx.Provide(service.NewManagementService),
+		fx.Provide(func() *service.Management {
+			return service.NewManagementService(viper.GetString(ConfigKeyRuntimePath))
+		}),
 		fx.Provide(route.NewRoutes),
 		fx.Invoke(run),
 	)
