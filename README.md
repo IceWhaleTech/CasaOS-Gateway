@@ -6,6 +6,19 @@ This gateway service comes with a simple management API for other services to re
 
 > As a best practice, a service behind this gateway should bind to localhost (`127.0.0.1` for IPv4, `::1` for IPv6) ONLY, so no external network access is allowed.
 
+## Build / Install
+
+```bash
+$ make # build
+...
+$ sudo make install # copy built files to system, then enable service.
+...
+$ sudo make uninstall # disable service and remove from system.
+...
+$ make clean # remove built files.
+...
+```
+
 ## Configuration
 
 Upon launching, it will search for `gateway.ini` file in the following order:
