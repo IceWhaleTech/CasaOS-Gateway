@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
@@ -51,7 +52,7 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
-	signal.Notify(kill)
+	signal.Notify(kill, syscall.SIGTERM, syscall.SIGINT)
 
 	go func() {
 		<-kill
