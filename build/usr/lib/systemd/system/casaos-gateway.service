@@ -6,7 +6,7 @@ Description=CasaOS Gateway
 [Service]
 ExecStart=/usr/bin/casaos-gateway
 PIDFile=/var/run/casaos/gateway.pid
-#Restart=always
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
