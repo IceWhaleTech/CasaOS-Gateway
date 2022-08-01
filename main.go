@@ -98,6 +98,10 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 					})
 
 					port := viper.GetString(ConfigKeyGatewayPort)
+					if port == "" {
+						port = "80"
+					}
+
 					addr := net.JoinHostPort("", port)
 
 					return serve(common.GatewayURLFilename, addr, gatewayMux)
