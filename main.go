@@ -151,7 +151,7 @@ func checkPrequisites() error {
 }
 
 func loadConfig() error {
-	viper.SetDefault(ConfigKeyGatewayPort, "8080")
+	viper.SetDefault(ConfigKeyGatewayPort, "80")
 	viper.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")

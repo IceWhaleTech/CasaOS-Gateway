@@ -6,9 +6,15 @@ BUILD_DIR = $(TARGET_DIR)/build
 
 INSTALL_ROOT = /
 
-$(APP_NAME): clean
+all: $(TARGET_DIR)
+
+$(BUILD_DIR): clean
 	mkdir -pv $(BUILD_DIR)/usr/bin
+
+$(APP_NAME): $(BUILD_DIR)
 	go build -v -o $(BUILD_DIR)/usr/bin/$(APP_NAME)
+
+$(TARGET_DIR): $(APP_NAME)
 	cp -rv build $(TARGET_DIR)
 
 clean:

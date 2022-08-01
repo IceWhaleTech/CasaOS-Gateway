@@ -2,4 +2,4 @@
 RuntimePath=/var/run/casaos
 
 [gateway]
-Port=80
+Port=
