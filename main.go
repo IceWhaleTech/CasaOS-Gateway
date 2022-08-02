@@ -20,7 +20,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -116,8 +115,6 @@ func run(
 					proxy.ServeHTTP(w, r)
 				})
 
-				var g errgroup.Group
-
 				if state.GetGatewayPort() == "" {
 					if err := state.SetGatewayPort("80"); err != nil {
 						return err
@@ -133,15 +130,12 @@ func run(
 				})
 
 				// management server
-				g.Go(func() error {
-					s := &http.Server{
-						Handler:           route,
-						ReadHeaderTimeout: 5 * time.Second,
-					}
-					return start(s, common.ManagementURLFilename, "127.0.0.1:0")
-				})
+				s := &http.Server{
+					Handler:           route,
+					ReadHeaderTimeout: 5 * time.Second,
+				}
 
-				return g.Wait()
+				return start(s, common.ManagementURLFilename, "127.0.0.1:0")
 			},
 		})
 }
