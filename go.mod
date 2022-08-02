@@ -8,7 +8,6 @@ require (
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/spf13/viper v1.12.0
 	go.uber.org/fx v1.17.1
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	gotest.tools v2.2.0+incompatible
 )
 
