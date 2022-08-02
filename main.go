@@ -28,14 +28,14 @@ const (
 )
 
 var (
-	state   *service.State
-	gateway *http.Server
+	_state   *service.State
+	_gateway *http.Server
 )
 
 func init() {
-	state = service.NewState()
+	_state = service.NewState()
 
-	if err := load(state); err != nil {
+	if err := load(_state); err != nil {
 		panic(err)
 	}
 
@@ -58,8 +58,8 @@ func main() {
 	)
 
 	defer func() {
-		if gateway != nil {
-			if err := gateway.Shutdown(context.Background()); err != nil {
+		if _gateway != nil {
+			if err := _gateway.Shutdown(context.Background()); err != nil {
 				log.Println(err)
 			}
 		}
@@ -76,7 +76,7 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(func() *service.Management {
-			return service.NewManagementService(state)
+			return service.NewManagementService(_state)
 		}),
 		fx.Provide(route.NewRoutes),
 		fx.Invoke(run),
@@ -115,17 +115,17 @@ func run(
 					proxy.ServeHTTP(w, r)
 				})
 
-				if state.GetGatewayPort() == "" {
-					if err := state.SetGatewayPort("80"); err != nil {
+				if _state.GetGatewayPort() == "" {
+					if err := _state.SetGatewayPort("80"); err != nil {
 						return err
 					}
 				}
 
-				if err := reloadGateway(state.GetGatewayPort(), gatewayMux); err != nil {
+				if err := reloadGateway(_state.GetGatewayPort(), gatewayMux); err != nil {
 					return err
 				}
 
-				state.OnGatewayPortChange(func(port string) error {
+				_state.OnGatewayPortChange(func(port string) error {
 					return reloadGateway(port, gatewayMux)
 				})
 
@@ -197,19 +197,19 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	}
 
 	// stop old gateway
-	if gateway != nil {
-		if err := gateway.Shutdown(context.Background()); err != nil {
+	if _gateway != nil {
+		if err := _gateway.Shutdown(context.Background()); err != nil {
 			return err
 		}
 	}
 
-	gateway = gatewayNew
+	_gateway = gatewayNew
 
 	return nil
 }
 
 func writePidFile() (string, error) {
-	runtimePath := state.GetRuntimePath()
+	runtimePath := _state.GetRuntimePath()
 
 	filename := "gateway.pid"
 	filepath := filepath.Join(runtimePath, filename)
@@ -217,7 +217,7 @@ func writePidFile() (string, error) {
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
-	runtimePath := state.GetRuntimePath()
+	runtimePath := _state.GetRuntimePath()
 
 	err := os.MkdirAll(runtimePath, 0o755)
 	if err != nil {
@@ -229,7 +229,7 @@ func writeAddressFile(filename string, address string) (string, error) {
 }
 
 func cleanupFiles(filenames ...string) {
-	runtimePath := state.GetRuntimePath()
+	runtimePath := _state.GetRuntimePath()
 
 	for _, filename := range filenames {
 		err := os.Remove(filepath.Join(runtimePath, filename))
@@ -240,7 +240,7 @@ func cleanupFiles(filenames ...string) {
 }
 
 func checkPrequisites() error {
-	path := state.GetRuntimePath()
+	path := _state.GetRuntimePath()
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {

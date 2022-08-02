@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/IceWhaleTech/CasaOS-Common/model"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/err"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-contrib/gzip"
@@ -66,6 +68,14 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			_management.CreateRoute(route)
 
 			ctx.Status(http.StatusCreated)
+		})
+
+		v1RoutesGroup.GET("/port", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, &model.Result{
+				Success: err.SUCCESS,
+				Message: err.GetMsg(err.SUCCESS),
+				Data:    _management.GetGatewayPort(),
+			})
 		})
 	}
 }
