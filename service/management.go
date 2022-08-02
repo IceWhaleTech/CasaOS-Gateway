@@ -51,7 +51,7 @@ func NewManagementService(state *State) *Management {
 func (g *Management) CreateRoute(route *common.Route) {
 	url, err := url.Parse(route.Target)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	g.pathTargetMap[route.Path] = route.Target

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -26,7 +27,7 @@ var (
 	gateway *http.Server
 )
 
-func main() {
+func init() {
 	state = service.NewState()
 
 	if err := Load(state); err != nil {
@@ -36,7 +37,9 @@ func main() {
 	if err := checkPrequisites(); err != nil {
 		panic(err)
 	}
+}
 
+func main() {
 	pidFilename, err := writePidFile()
 	if err != nil {
 		panic(err)
@@ -48,6 +51,14 @@ func main() {
 		common.GatewayURLFilename,
 		common.ManagementURLFilename,
 	)
+
+	defer func() {
+		if gateway != nil {
+			if err := gateway.Shutdown(context.Background()); err != nil {
+				log.Println(err)
+			}
+		}
+	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	kill := make(chan os.Signal, 1)
@@ -79,42 +90,121 @@ func run(
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
-				var g errgroup.Group
-
-				// management server
-				g.Go(func() error {
-					return serve(common.ManagementURLFilename, "127.0.0.1:0", route)
-				})
-
-				// gateway server
-				g.Go(func() error {
-					gatewayMux := http.NewServeMux()
-					gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-						proxy := management.GetProxy(r.URL.Path)
-
-						if proxy == nil {
-							w.WriteHeader(http.StatusNotFound)
-							return
-						}
-
-						proxy.ServeHTTP(w, r)
-					})
-
-					port := state.GetGatewayPort()
-					if port == "" {
-						if err := state.SetGatewayPort("80"); err != nil {
-							return err
+				// gateway service
+				gatewayMux := http.NewServeMux()
+				gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+					if r.URL.Path == "/" {
+						if _, err := w.Write([]byte("TODO")); err != nil {
+							log.Println(err)
 						}
 					}
 
-					addr := net.JoinHostPort("", port)
+					proxy := management.GetProxy(r.URL.Path)
 
-					return serve(common.GatewayURLFilename, addr, gatewayMux)
+					if proxy == nil {
+						w.WriteHeader(http.StatusNotFound)
+						return
+					}
+
+					proxy.ServeHTTP(w, r)
+				})
+
+				var g errgroup.Group
+
+				if state.GetGatewayPort() != "" {
+					if err := state.SetGatewayPort("80"); err != nil {
+						return err
+					}
+				}
+
+				if err := reloadGateway(state.GetGatewayPort(), gatewayMux); err != nil {
+					return err
+				}
+
+				state.OnGatewayPortChange(func(port string) error {
+					return reloadGateway(port, gatewayMux)
+				})
+
+				// management server
+				g.Go(func() error {
+					s := &http.Server{
+						Handler:           route,
+						ReadHeaderTimeout: 5 * time.Second,
+					}
+					return start(s, common.ManagementURLFilename, "127.0.0.1:0")
 				})
 
 				return g.Wait()
 			},
 		})
+}
+
+func start(s *http.Server, urlFilename string, addr string) error {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+
+	url := "http://" + listener.Addr().String()
+
+	urlFilePath, err := writeAddressFile(urlFilename, url)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("listening on %s (saved to %s)", url, urlFilePath)
+
+	return s.Serve(listener)
+}
+
+func reloadGateway(port string, route *http.ServeMux) error {
+	addr := net.JoinHostPort("", port)
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	// start new gateway
+	url := "http://" + listener.Addr().String()
+
+	urlFilePath, err := writeAddressFile(common.GatewayURLFilename, url)
+	if err != nil {
+		return err
+	}
+
+	gatewayNew := &http.Server{
+		Handler:           route,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	go func() {
+		log.Printf("listening on %s (saved to %s)", url, urlFilePath)
+		err := gatewayNew.Serve(listener)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+
+	// check if gatewayNew is running
+	response, err := http.Get(url) //nolint:gosec
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return errors.New("gatewayNew is not running")
+	}
+
+	// stop old gateway
+	if gateway != nil {
+		if err := gateway.Shutdown(context.Background()); err != nil {
+			return err
+		}
+	}
+
+	gateway = gatewayNew
+
+	return nil
 }
 
 func writePidFile() (string, error) {
@@ -157,27 +247,4 @@ func checkPrequisites() error {
 	}
 
 	return nil
-}
-
-func serve(urlFilename string, addr string, route http.Handler) error {
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		panic(err)
-	}
-
-	url := "http://" + listener.Addr().String()
-
-	urlFilePath, err := writeAddressFile(urlFilename, url)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("listening on %s (saved to %s)", url, urlFilePath)
-
-	s := &http.Server{
-		Handler:           route,
-		ReadHeaderTimeout: 5 * time.Second,
-	}
-
-	return s.Serve(listener)
 }
