@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
-	"github.com/IceWhaleTech/CasaOS-Gateway/config"
 )
 
 const RoutesFile = "routes.json"
@@ -21,8 +20,8 @@ type Management struct {
 	runtimePath         string
 }
 
-func NewManagementService(cfg *config.State) *Management {
-	routesFilepath := filepath.Join(cfg.GetRuntimePath(), RoutesFile)
+func NewManagementService(state *State) *Management {
+	routesFilepath := filepath.Join(state.GetRuntimePath(), RoutesFile)
 
 	// try to load routes from routes.json
 	pathTargetMap, err := loadPathTargetMapFrom(routesFilepath)
@@ -45,7 +44,7 @@ func NewManagementService(cfg *config.State) *Management {
 	return &Management{
 		pathTargetMap:       pathTargetMap,
 		pathReverseProxyMap: pathReverseProxyMap,
-		runtimePath:         cfg.GetRuntimePath(),
+		runtimePath:         state.GetRuntimePath(),
 	}
 }
 

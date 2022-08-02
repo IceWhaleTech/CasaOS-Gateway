@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
-	"github.com/IceWhaleTech/CasaOS-Gateway/config"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
@@ -22,12 +21,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var cfg *config.State
+var state *service.State
 
 func main() {
-	cfg = config.NewState()
+	state = service.NewState()
 
-	if err := config.Load(cfg); err != nil {
+	if err := Load(state); err != nil {
 		panic(err)
 	}
 
@@ -58,7 +57,7 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(func() *service.Management {
-			return service.NewManagementService(cfg)
+			return service.NewManagementService(state)
 		}),
 		fx.Provide(route.NewRoutes),
 		fx.Invoke(run),
@@ -98,9 +97,9 @@ func run(
 						proxy.ServeHTTP(w, r)
 					})
 
-					port := cfg.GetGatewayPort()
+					port := state.GetGatewayPort()
 					if port == "" {
-						if err := cfg.SetGatewayPort("80"); err != nil {
+						if err := state.SetGatewayPort("80"); err != nil {
 							return err
 						}
 					}
@@ -116,7 +115,7 @@ func run(
 }
 
 func writePidFile() (string, error) {
-	runtimePath := cfg.GetRuntimePath()
+	runtimePath := state.GetRuntimePath()
 
 	filename := "gateway.pid"
 	filepath := filepath.Join(runtimePath, filename)
@@ -124,7 +123,7 @@ func writePidFile() (string, error) {
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
-	runtimePath := cfg.GetRuntimePath()
+	runtimePath := state.GetRuntimePath()
 
 	err := os.MkdirAll(runtimePath, 0o755)
 	if err != nil {
@@ -136,7 +135,7 @@ func writeAddressFile(filename string, address string) (string, error) {
 }
 
 func cleanupFiles(filenames ...string) {
-	runtimePath := cfg.GetRuntimePath()
+	runtimePath := state.GetRuntimePath()
 
 	for _, filename := range filenames {
 		err := os.Remove(filepath.Join(runtimePath, filename))
@@ -147,7 +146,7 @@ func cleanupFiles(filenames ...string) {
 }
 
 func checkPrequisites() error {
-	path := cfg.GetRuntimePath()
+	path := state.GetRuntimePath()
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {

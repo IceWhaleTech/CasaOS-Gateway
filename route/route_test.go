@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
-	"github.com/IceWhaleTech/CasaOS-Gateway/config"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
@@ -21,12 +20,12 @@ var router *gin.Engine
 func setup(t *testing.T) func(t *testing.T) {
 	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
 
-	cfg := config.NewState()
-	if err := cfg.SetRuntimePath(tmpdir); err != nil {
+	state := service.NewState()
+	if err := state.SetRuntimePath(tmpdir); err != nil {
 		t.Fatal(err)
 	}
 
-	management := service.NewManagementService(cfg)
+	management := service.NewManagementService(state)
 	router = NewRoutes(management)
 
 	return func(t *testing.T) {
