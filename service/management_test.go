@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
+	"github.com/IceWhaleTech/CasaOS-Gateway/config"
 	"gotest.tools/assert"
 )
 
@@ -18,7 +19,17 @@ func TestRoutesPersistence(t *testing.T) {
 		os.RemoveAll(tmpdir2)
 	}()
 
-	management := NewManagementService(tmpdir1)
+	cfg1 := config.NewConfig()
+	if err := cfg1.SetRuntimePath(tmpdir1); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg2 := config.NewConfig()
+	if err := cfg2.SetRuntimePath(tmpdir2); err != nil {
+		t.Fatal(err)
+	}
+
+	management := NewManagementService(cfg1)
 
 	route := &common.Route{
 		Path:   "/test",
@@ -27,11 +38,11 @@ func TestRoutesPersistence(t *testing.T) {
 
 	management.CreateRoute(route)
 
-	management = NewManagementService(tmpdir2)
+	management = NewManagementService(cfg2)
 	routes := management.GetRoutes()
 	assert.Equal(t, 0, len(routes))
 
-	management = NewManagementService(tmpdir1)
+	management = NewManagementService(cfg1)
 	routes = management.GetRoutes()
 	assert.Equal(t, 1, len(routes))
 	assert.Equal(t, "/test", routes[0].Path)

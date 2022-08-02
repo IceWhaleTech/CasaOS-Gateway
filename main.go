@@ -14,27 +14,24 @@ import (
 	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
+	"github.com/IceWhaleTech/CasaOS-Gateway/config"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 	"go.uber.org/fx"
 	"golang.org/x/sync/errgroup"
 )
 
-const (
-	ConfigKeyGatewayPort = "gateway.Port"
-	ConfigKeyRuntimePath = "common.RuntimePath"
-)
+var cfg *config.Config
 
 func main() {
-	err := loadConfig()
-	if err != nil {
+	cfg = config.NewConfig()
+
+	if err := config.Load(cfg); err != nil {
 		panic(err)
 	}
 
-	err = checkPrequisites()
-	if err != nil {
+	if err := checkPrequisites(); err != nil {
 		panic(err)
 	}
 
@@ -61,7 +58,7 @@ func main() {
 
 	app := fx.New(
 		fx.Provide(func() *service.Management {
-			return service.NewManagementService(viper.GetString(ConfigKeyRuntimePath))
+			return service.NewManagementService(cfg)
 		}),
 		fx.Provide(route.NewRoutes),
 		fx.Invoke(run),
@@ -72,7 +69,11 @@ func main() {
 	}
 }
 
-func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Management) {
+func run(
+	lifecycle fx.Lifecycle,
+	route *gin.Engine,
+	management *service.Management,
+) {
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
@@ -97,9 +98,11 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 						proxy.ServeHTTP(w, r)
 					})
 
-					port := viper.GetString(ConfigKeyGatewayPort)
+					port := cfg.GetGatewayPort()
 					if port == "" {
-						port = "80"
+						if err := cfg.SetGatewayPort("80"); err != nil {
+							return err
+						}
 					}
 
 					addr := net.JoinHostPort("", port)
@@ -113,7 +116,7 @@ func run(lifecycle fx.Lifecycle, route *gin.Engine, management *service.Manageme
 }
 
 func writePidFile() (string, error) {
-	runtimePath := viper.GetString(ConfigKeyRuntimePath)
+	runtimePath := cfg.GetRuntimePath()
 
 	filename := "gateway.pid"
 	filepath := filepath.Join(runtimePath, filename)
@@ -121,22 +124,22 @@ func writePidFile() (string, error) {
 }
 
 func writeAddressFile(filename string, address string) (string, error) {
-	path := viper.GetString(ConfigKeyRuntimePath)
+	runtimePath := cfg.GetRuntimePath()
 
-	err := os.MkdirAll(path, 0o755)
+	err := os.MkdirAll(runtimePath, 0o755)
 	if err != nil {
 		return "", err
 	}
 
-	filepath := filepath.Join(path, filename)
+	filepath := filepath.Join(runtimePath, filename)
 	return filepath, ioutil.WriteFile(filepath, []byte(address), 0o600)
 }
 
 func cleanupFiles(filenames ...string) {
-	RuntimePath := viper.GetString(ConfigKeyRuntimePath)
+	runtimePath := cfg.GetRuntimePath()
 
 	for _, filename := range filenames {
-		err := os.Remove(filepath.Join(RuntimePath, filename))
+		err := os.Remove(filepath.Join(runtimePath, filename))
 		if err != nil {
 			log.Println(err)
 		}
@@ -144,7 +147,7 @@ func cleanupFiles(filenames ...string) {
 }
 
 func checkPrequisites() error {
-	path := viper.GetString(ConfigKeyRuntimePath)
+	path := cfg.GetRuntimePath()
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {
@@ -152,29 +155,6 @@ func checkPrequisites() error {
 	}
 
 	return nil
-}
-
-func loadConfig() error {
-	viper.SetDefault(ConfigKeyGatewayPort, "80")
-	viper.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
-
-	viper.SetConfigName("gateway")
-	viper.SetConfigType("ini")
-
-	currentDirectory, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	if configPath, success := os.LookupEnv("CASAOS_CONFIG_PATH"); success {
-		viper.AddConfigPath(configPath)
-	}
-
-	viper.AddConfigPath(currentDirectory)
-	viper.AddConfigPath(filepath.Join(currentDirectory, "conf"))
-	viper.AddConfigPath(filepath.Join("/", "etc", "casaos"))
-
-	return viper.ReadInConfig()
 }
 
 func serve(urlFilename string, addr string, route http.Handler) error {

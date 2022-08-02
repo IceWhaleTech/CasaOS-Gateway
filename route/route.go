@@ -47,15 +47,15 @@ func buildV1Group(r *gin.Engine) {
 }
 
 func buildV1RouteGroup(v1Group *gin.RouterGroup) {
-	v1RoutesGroup := v1Group.Group("/routes")
+	v1RoutesGroup := v1Group.Group("/gateway")
 
 	v1RoutesGroup.Use()
 	{
-		v1RoutesGroup.GET("", func(ctx *gin.Context) {
+		v1RoutesGroup.GET("/routes", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, _management.GetRoutes())
 		})
 
-		v1RoutesGroup.POST("", func(ctx *gin.Context) {
+		v1RoutesGroup.POST("/routes", func(ctx *gin.Context) {
 			var route *common.Route
 			err := ctx.ShouldBindJSON(&route)
 			if err != nil {
