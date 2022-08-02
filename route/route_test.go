@@ -21,7 +21,7 @@ var router *gin.Engine
 func setup(t *testing.T) func(t *testing.T) {
 	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
 
-	cfg := config.NewConfig()
+	cfg := config.NewState()
 	if err := cfg.SetRuntimePath(tmpdir); err != nil {
 		t.Fatal(err)
 	}

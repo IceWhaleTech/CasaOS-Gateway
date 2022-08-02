@@ -19,12 +19,12 @@ func TestRoutesPersistence(t *testing.T) {
 		os.RemoveAll(tmpdir2)
 	}()
 
-	cfg1 := config.NewConfig()
+	cfg1 := config.NewState()
 	if err := cfg1.SetRuntimePath(tmpdir1); err != nil {
 		t.Fatal(err)
 	}
 
-	cfg2 := config.NewConfig()
+	cfg2 := config.NewState()
 	if err := cfg2.SetRuntimePath(tmpdir2); err != nil {
 		t.Fatal(err)
 	}

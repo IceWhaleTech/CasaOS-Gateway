@@ -22,10 +22,10 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var cfg *config.Config
+var cfg *config.State
 
 func main() {
-	cfg = config.NewConfig()
+	cfg = config.NewState()
 
 	if err := config.Load(cfg); err != nil {
 		panic(err)

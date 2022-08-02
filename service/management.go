@@ -21,7 +21,7 @@ type Management struct {
 	runtimePath         string
 }
 
-func NewManagementService(cfg *config.Config) *Management {
+func NewManagementService(cfg *config.State) *Management {
 	routesFilepath := filepath.Join(cfg.GetRuntimePath(), RoutesFile)
 
 	// try to load routes from routes.json
