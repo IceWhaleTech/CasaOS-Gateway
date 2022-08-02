@@ -1,22 +1,22 @@
 package service
 
 type State struct {
-	gatewayPort string
-	runtimePath string
-	onChange    []func(*State) error
+	gatewayPort         string
+	runtimePath         string
+	onGatewayPortChange []func(string) error
 }
 
 func NewState() *State {
 	return &State{
-		gatewayPort: "",
-		runtimePath: "",
-		onChange:    make([]func(*State) error, 0),
+		gatewayPort:         "",
+		runtimePath:         "",
+		onGatewayPortChange: make([]func(string) error, 0),
 	}
 }
 
 func (c *State) SetGatewayPort(port string) error {
 	c.gatewayPort = port
-	return c.change()
+	return c.notifiyOnGatewayPortChange()
 }
 
 func (c *State) GetGatewayPort() string {
@@ -25,20 +25,20 @@ func (c *State) GetGatewayPort() string {
 
 func (c *State) SetRuntimePath(path string) error {
 	c.runtimePath = path
-	return c.change()
+	return c.notifiyOnGatewayPortChange()
 }
 
 func (c *State) GetRuntimePath() string {
 	return c.runtimePath
 }
 
-func (c *State) OnChange(f func(*State) error) {
-	c.onChange = append(c.onChange, f)
+func (c *State) OnGatewayPortChange(f func(string) error) {
+	c.onGatewayPortChange = append(c.onGatewayPortChange, f)
 }
 
-func (c *State) change() error {
-	for _, f := range c.onChange {
-		if err := f(c); err != nil {
+func (c *State) notifiyOnGatewayPortChange() error {
+	for _, f := range c.onGatewayPortChange {
+		if err := f(c.gatewayPort); err != nil {
 			return err
 		}
 	}

@@ -21,7 +21,10 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var state *service.State
+var (
+	state   *service.State
+	gateway *http.Server
+)
 
 func main() {
 	state = service.NewState()
