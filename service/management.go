@@ -7,6 +7,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
@@ -81,9 +82,13 @@ func (g *Management) GetRoutes() []*common.Route {
 }
 
 func (g *Management) GetProxy(path string) *httputil.ReverseProxy {
-	for p, proxy := range g.pathReverseProxyMap {
+	// sort paths by length in descending order
+	// (without this step, a path like "/abcd" can potentially be matched with "/ab")
+	paths := getSortedKeys(g.pathReverseProxyMap)
+
+	for _, p := range paths {
 		if strings.HasPrefix(path, p) {
-			return proxy
+			return g.pathReverseProxyMap[p]
 		}
 	}
 	return nil
@@ -99,6 +104,18 @@ func (g *Management) SetGatewayPort(port string) error {
 	}
 
 	return nil
+}
+
+func getSortedKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+
+	for key := range m {
+		keys = append(keys, key)
+	}
+
+	sort.Slice(keys, func(i, j int) bool { return len(keys[i]) > len(keys[j]) })
+
+	return keys
 }
 
 func loadPathTargetMapFrom(routesFilepath string) (map[string]string, error) {
