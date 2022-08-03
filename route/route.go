@@ -88,7 +88,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 		})
 
 		v1RoutesGroup.PUT("/port", func(ctx *gin.Context) {
-			var request *common.UpdatePortRequest
+			var request *common.ChangePortRequest
 
 			if err := ctx.ShouldBindJSON(&request); err != nil {
 				ctx.JSON(http.StatusBadRequest, model.Result{

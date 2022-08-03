@@ -5,6 +5,6 @@ type Route struct {
 	Target string `json:"target" binding:"required"`
 }
 
-type UpdatePortRequest struct {
+type ChangePortRequest struct {
 	Port string `json:"port" binding:"required"`
 }
