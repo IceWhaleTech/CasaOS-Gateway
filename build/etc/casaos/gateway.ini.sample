@@ -1,5 +1,5 @@
 [common]
-RuntimePath=/var/run/casaos
+runtimepath=/var/run/casaos
 
 [gateway]
-Port=
+port=
