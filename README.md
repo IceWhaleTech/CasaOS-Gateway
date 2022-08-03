@@ -30,15 +30,7 @@ $HOME/.casaos/gateway.ini
 /etc/casaos/gateway.ini
 ```
 
-Default configurations are:
-
-```ini
-[common]
-RuntimePath=/var/run/casaos # See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
-
-[gateway]
-port=80
-```
+See [gateway.ini.sample](./build/etc/casaos/gateway.ini.sample) for default configuration.
 
 ## Running
 
