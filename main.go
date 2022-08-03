@@ -99,14 +99,6 @@ func run(
 ) {
 	lifecycle.Append(
 		fx.Hook{
-			OnStart: func(context.Context) error {
-				log.Println("lalala...")
-				return nil
-			},
-		},
-	)
-	lifecycle.Append(
-		fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				// gateway service
 				gatewayMux := buildGatewayMux(management)
@@ -125,6 +117,13 @@ func run(
 					return reloadGateway(port, gatewayMux)
 				})
 
+				return nil
+			},
+		})
+
+	lifecycle.Append(
+		fx.Hook{
+			OnStart: func(context.Context) error {
 				// management server
 				listener, err := net.Listen("tcp", "127.1:0")
 				if err != nil {
@@ -144,7 +143,8 @@ func run(
 				log.Printf("management listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
 				return managementServer.Serve(listener)
 			},
-		})
+		},
+	)
 }
 
 func buildGatewayMux(management *service.Management) *http.ServeMux {
