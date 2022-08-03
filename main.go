@@ -41,7 +41,7 @@ func init() {
 		panic(err)
 	}
 
-	if err := checkPrequisites(); err != nil {
+	if err := checkPrequisites(_state); err != nil {
 		panic(err)
 	}
 
@@ -51,15 +51,14 @@ func init() {
 }
 
 func main() {
-	pidFilename, err := writePidFile()
+	pidFilename, err := writePidFile(_state.GetRuntimePath())
 	if err != nil {
 		panic(err)
 	}
 
 	defer cleanupFiles(
-		pidFilename,
-		service.RoutesFile,
-		common.ManagementURLFilename,
+		_state.GetRuntimePath(),
+		pidFilename, service.RoutesFile, common.ManagementURLFilename,
 	)
 
 	defer func() {
@@ -97,10 +96,10 @@ func run(
 	route *gin.Engine,
 	management *service.Management,
 ) {
+	// gateway service
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
-				// gateway service
 				gatewayMux := buildGatewayMux(management)
 
 				if _state.GetGatewayPort() == "" {
@@ -109,22 +108,18 @@ func run(
 					}
 				}
 
-				if err := reloadGateway(_state.GetGatewayPort(), gatewayMux); err != nil {
-					return err
-				}
-
 				_state.OnGatewayPortChange(func(port string) error {
 					return reloadGateway(port, gatewayMux)
 				})
 
-				return nil
+				return reloadGateway(_state.GetGatewayPort(), gatewayMux)
 			},
 		})
 
+	// management server
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(context.Context) error {
-				// management server
 				listener, err := net.Listen("tcp", "127.1:0")
 				if err != nil {
 					return err
@@ -135,7 +130,7 @@ func run(
 					ReadHeaderTimeout: 5 * time.Second,
 				}
 
-				urlFilePath, err := writeAddressFile(common.ManagementURLFilename, "http://"+listener.Addr().String())
+				urlFilePath, err := writeAddressFile(_state.GetRuntimePath(), common.ManagementURLFilename, "http://"+listener.Addr().String())
 				if err != nil {
 					return err
 				}
@@ -145,29 +140,6 @@ func run(
 			},
 		},
 	)
-}
-
-func buildGatewayMux(management *service.Management) *http.ServeMux {
-	gatewayMux := http.NewServeMux()
-	gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			if _, err := w.Write([]byte("TODO")); err != nil {
-				log.Println(err)
-			}
-			return
-		}
-
-		proxy := management.GetProxy(r.URL.Path)
-
-		if proxy == nil {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-
-		proxy.ServeHTTP(w, r)
-	})
-
-	return gatewayMux
 }
 
 func reloadGateway(port string, route *http.ServeMux) error {
@@ -213,6 +185,29 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	return nil
 }
 
+func buildGatewayMux(management *service.Management) *http.ServeMux {
+	gatewayMux := http.NewServeMux()
+	gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			if _, err := w.Write([]byte("TODO")); err != nil {
+				log.Println(err)
+			}
+			return
+		}
+
+		proxy := management.GetProxy(r.URL.Path)
+
+		if proxy == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		proxy.ServeHTTP(w, r)
+	})
+
+	return gatewayMux
+}
+
 func checkURL(url string) error {
 	var response *http.Response
 	var err error
@@ -238,17 +233,13 @@ func checkURL(url string) error {
 	return nil
 }
 
-func writePidFile() (string, error) {
-	runtimePath := _state.GetRuntimePath()
-
+func writePidFile(runtimePath string) (string, error) {
 	filename := "gateway.pid"
 	filepath := filepath.Join(runtimePath, filename)
 	return filename, ioutil.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0o600)
 }
 
-func writeAddressFile(filename string, address string) (string, error) {
-	runtimePath := _state.GetRuntimePath()
-
+func writeAddressFile(runtimePath string, filename string, address string) (string, error) {
 	err := os.MkdirAll(runtimePath, 0o755)
 	if err != nil {
 		return "", err
@@ -258,9 +249,7 @@ func writeAddressFile(filename string, address string) (string, error) {
 	return filepath, ioutil.WriteFile(filepath, []byte(address), 0o600)
 }
 
-func cleanupFiles(filenames ...string) {
-	runtimePath := _state.GetRuntimePath()
-
+func cleanupFiles(runtimePath string, filenames ...string) {
 	for _, filename := range filenames {
 		err := os.Remove(filepath.Join(runtimePath, filename))
 		if err != nil {
@@ -269,8 +258,8 @@ func cleanupFiles(filenames ...string) {
 	}
 }
 
-func checkPrequisites() error {
-	path := _state.GetRuntimePath()
+func checkPrequisites(state *service.State) error {
+	path := state.GetRuntimePath()
 
 	err := os.MkdirAll(path, 0o755)
 	if err != nil {
