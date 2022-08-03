@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
-	"github.com/IceWhaleTech/CasaOS-Common/utils/err"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/common_err"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-contrib/gzip"
@@ -61,21 +61,50 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			var route *common.Route
 			err := ctx.ShouldBindJSON(&route)
 			if err != nil {
-				ctx.JSON(http.StatusBadRequest, err.Error())
+				ctx.JSON(http.StatusBadRequest, model.Result{
+					Success: common_err.CLIENT_ERROR,
+					Message: err.Error(),
+				})
 				return
 			}
 
-			_management.CreateRoute(route)
+			if err := _management.CreateRoute(route); err != nil {
+				ctx.JSON(http.StatusInternalServerError, model.Result{
+					Success: common_err.SERVICE_ERROR,
+					Message: err.Error(),
+				})
+				return
+			}
 
 			ctx.Status(http.StatusCreated)
 		})
 
 		v1RoutesGroup.GET("/port", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, &model.Result{
-				Success: err.SUCCESS,
-				Message: err.GetMsg(err.SUCCESS),
+			ctx.JSON(http.StatusOK, model.Result{
+				Success: common_err.SUCCESS,
+				Message: common_err.GetMsg(common_err.SUCCESS),
 				Data:    _management.GetGatewayPort(),
 			})
+		})
+
+		v1RoutesGroup.PUT("/port", func(ctx *gin.Context) {
+			var request *common.UpdatePortRequest
+
+			if err := ctx.ShouldBindJSON(&request); err != nil {
+				ctx.JSON(http.StatusBadRequest, model.Result{
+					Success: common_err.CLIENT_ERROR,
+					Message: err.Error(),
+				})
+				return
+			}
+
+			if err := _management.SetGatewayPort(request.Port); err != nil {
+				ctx.JSON(http.StatusInternalServerError, model.Result{
+					Success: common_err.SERVICE_ERROR,
+					Message: err.Error(),
+				})
+				return
+			}
 		})
 	}
 }

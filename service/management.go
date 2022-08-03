@@ -48,21 +48,23 @@ func NewManagementService(state *State) *Management {
 	}
 }
 
-func (g *Management) CreateRoute(route *common.Route) {
+func (g *Management) CreateRoute(route *common.Route) error {
 	url, err := url.Parse(route.Target)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
 	g.pathTargetMap[route.Path] = route.Target
 	g.pathReverseProxyMap[route.Path] = httputil.NewSingleHostReverseProxy(url)
 
-	routesFilePath := filepath.Join(g.state.GetGatewayPort(), RoutesFile)
+	routesFilePath := filepath.Join(g.state.GetRuntimePath(), RoutesFile)
 
 	err = savePathTargetMapTo(routesFilePath, g.pathTargetMap)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
+
+	return nil
 }
 
 func (g *Management) GetRoutes() []*common.Route {
@@ -89,6 +91,14 @@ func (g *Management) GetProxy(path string) *httputil.ReverseProxy {
 
 func (g *Management) GetGatewayPort() string {
 	return g.state.GetGatewayPort()
+}
+
+func (g *Management) SetGatewayPort(port string) error {
+	if err := g.state.SetGatewayPort(port); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func loadPathTargetMapFrom(routesFilepath string) (map[string]string, error) {

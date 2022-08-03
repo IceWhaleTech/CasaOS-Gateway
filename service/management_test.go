@@ -35,7 +35,9 @@ func TestRoutesPersistence(t *testing.T) {
 		Target: "http://localhost:8080",
 	}
 
-	management.CreateRoute(route)
+	if err := management.CreateRoute(route); err != nil {
+		t.Fatal(err)
+	}
 
 	management = NewManagementService(state2)
 	routes := management.GetRoutes()

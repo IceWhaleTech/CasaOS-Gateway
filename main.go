@@ -186,7 +186,9 @@ func reloadGateway(port string, route *http.ServeMux) error {
 		}
 	}()
 
-	// check if gatewayNew is running
+	// check if gatewayNew is running after few seconds
+	time.Sleep(3 * time.Second)
+
 	response, err := http.Get(url) //nolint:gosec
 	if err != nil {
 		return err

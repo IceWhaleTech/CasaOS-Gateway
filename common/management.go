@@ -19,11 +19,6 @@ const (
 
 const APIPath = "/v1/routes"
 
-type Route struct {
-	Path   string `json:"path" binding:"required"`
-	Target string `json:"target" binding:"required"`
-}
-
 type ManagementService interface {
 	CreateRoute(route *Route) error
 }
