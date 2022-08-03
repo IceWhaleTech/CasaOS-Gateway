@@ -14,10 +14,8 @@ import (
 
 const (
 	ManagementURLFilename = "management.url"
-	GatewayURLFilename    = "gateway.url"
+	APIPath               = "/v1/routes"
 )
-
-const APIPath = "/v1/routes"
 
 type ManagementService interface {
 	CreateRoute(route *Route) error

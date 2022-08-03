@@ -25,6 +25,8 @@ import (
 const (
 	configKeyGatewayPort = "gateway.Port"
 	configKeyRuntimePath = "common.RuntimePath"
+
+	defaultGatewayPort = "80"
 )
 
 var (
@@ -35,13 +37,17 @@ var (
 func init() {
 	_state = service.NewState()
 
-	if err := load(_state); err != nil {
+	if err := loadConfig(_state); err != nil {
 		panic(err)
 	}
 
 	if err := checkPrequisites(); err != nil {
 		panic(err)
 	}
+
+	_state.OnGatewayPortChange(func(s string) error {
+		return saveConfig(_state)
+	})
 }
 
 func main() {
@@ -53,7 +59,6 @@ func main() {
 	defer cleanupFiles(
 		pidFilename,
 		service.RoutesFile,
-		common.GatewayURLFilename,
 		common.ManagementURLFilename,
 	)
 
@@ -94,26 +99,17 @@ func run(
 ) {
 	lifecycle.Append(
 		fx.Hook{
+			OnStart: func(context.Context) error {
+				log.Println("lalala...")
+				return nil
+			},
+		},
+	)
+	lifecycle.Append(
+		fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				// gateway service
-				gatewayMux := http.NewServeMux()
-				gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-					if r.URL.Path == "/" {
-						if _, err := w.Write([]byte("TODO")); err != nil {
-							log.Println(err)
-						}
-						return
-					}
-
-					proxy := management.GetProxy(r.URL.Path)
-
-					if proxy == nil {
-						w.WriteHeader(http.StatusNotFound)
-						return
-					}
-
-					proxy.ServeHTTP(w, r)
-				})
+				gatewayMux := buildGatewayMux(management)
 
 				if _state.GetGatewayPort() == "" {
 					if err := _state.SetGatewayPort("80"); err != nil {
@@ -130,82 +126,114 @@ func run(
 				})
 
 				// management server
-				s := &http.Server{
+				listener, err := net.Listen("tcp", "127.1:0")
+				if err != nil {
+					return err
+				}
+
+				managementServer := &http.Server{
 					Handler:           route,
 					ReadHeaderTimeout: 5 * time.Second,
 				}
 
-				return start(s, common.ManagementURLFilename, "127.0.0.1:0")
+				urlFilePath, err := writeAddressFile(common.ManagementURLFilename, "http://"+listener.Addr().String())
+				if err != nil {
+					return err
+				}
+
+				log.Printf("management listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
+				return managementServer.Serve(listener)
 			},
 		})
 }
 
-func start(s *http.Server, urlFilename string, addr string) error {
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		panic(err)
-	}
+func buildGatewayMux(management *service.Management) *http.ServeMux {
+	gatewayMux := http.NewServeMux()
+	gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			if _, err := w.Write([]byte("TODO")); err != nil {
+				log.Println(err)
+			}
+			return
+		}
 
-	url := "http://" + listener.Addr().String()
+		proxy := management.GetProxy(r.URL.Path)
 
-	urlFilePath, err := writeAddressFile(urlFilename, url)
-	if err != nil {
-		return err
-	}
+		if proxy == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 
-	log.Printf("listening on %s (saved to %s)", url, urlFilePath)
+		proxy.ServeHTTP(w, r)
+	})
 
-	return s.Serve(listener)
+	return gatewayMux
 }
 
 func reloadGateway(port string, route *http.ServeMux) error {
 	addr := net.JoinHostPort("", port)
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		return err
+
+	if _gateway != nil && _gateway.Addr == addr {
+		log.Println("port is the same as current running gateway - no change is required")
+		return nil
 	}
 
 	// start new gateway
-	url := "http://" + listener.Addr().String()
-
-	urlFilePath, err := writeAddressFile(common.GatewayURLFilename, url)
-	if err != nil {
-		return err
-	}
-
 	gatewayNew := &http.Server{
+		Addr:              addr,
 		Handler:           route,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	go func() {
-		log.Printf("listening on %s (saved to %s)", url, urlFilePath)
-		err := gatewayNew.Serve(listener)
+		err := gatewayNew.ListenAndServe()
 		if err != nil {
 			log.Println(err)
 		}
 	}()
 
-	// check if gatewayNew is running after few seconds
-	time.Sleep(3 * time.Second)
-
-	response, err := http.Get(url) //nolint:gosec
-	if err != nil {
+	// test if gateway is running
+	url := "http://" + gatewayNew.Addr
+	if err := checkURL(url); err != nil {
 		return err
 	}
 
-	if response.StatusCode != http.StatusOK {
-		return errors.New("gatewayNew is not running")
-	}
+	log.Printf("gateway listening on %s", gatewayNew.Addr)
 
 	// stop old gateway
 	if _gateway != nil {
+		log.Printf("stopping current gateway on %s", _gateway.Addr)
 		if err := _gateway.Shutdown(context.Background()); err != nil {
 			return err
 		}
 	}
 
 	_gateway = gatewayNew
+
+	return nil
+}
+
+func checkURL(url string) error {
+	var response *http.Response
+	var err error
+
+	count := 3
+
+	for count >= 0 {
+		response, err = http.Get(url) //nolint:gosec
+
+		if err == nil && response.StatusCode == http.StatusOK {
+			break
+		}
+
+		time.Sleep(time.Second)
+
+		count--
+	}
+
+	if (response == nil) || (response.StatusCode != http.StatusOK) {
+		return errors.New("gateway not running")
+	}
 
 	return nil
 }
@@ -252,8 +280,8 @@ func checkPrequisites() error {
 	return nil
 }
 
-func load(state *service.State) error {
-	viper.SetDefault(configKeyGatewayPort, "80")
+func loadConfig(state *service.State) error {
+	viper.SetDefault(configKeyGatewayPort, defaultGatewayPort)
 	viper.SetDefault(configKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
@@ -287,7 +315,7 @@ func load(state *service.State) error {
 	return nil
 }
 
-func save(state *service.State) error {
+func saveConfig(state *service.State) error {
 	viper.Set(configKeyGatewayPort, state.GetGatewayPort())
 	viper.Set(configKeyRuntimePath, state.GetRuntimePath())
 
