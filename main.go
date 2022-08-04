@@ -23,6 +23,7 @@ import (
 
 const (
 	configKeyGatewayPort = "gateway.Port"
+	configKeyWWWPath     = "gateway.WWWPath"
 	configKeyRuntimePath = "common.RuntimePath"
 
 	defaultGatewayPort = "80"
@@ -57,7 +58,7 @@ func main() {
 
 	defer cleanupFiles(
 		_state.GetRuntimePath(),
-		pidFilename, service.RoutesFile, common.ManagementURLFilename,
+		pidFilename, common.ManagementURLFilename, common.StaticURLFilename,
 	)
 
 	defer func() {
@@ -78,10 +79,11 @@ func main() {
 	}()
 
 	app := fx.New(
-		fx.Provide(func() *service.Management {
-			return service.NewManagementService(_state)
-		}),
+		fx.Provide(func() *service.State { return _state }),
+		fx.Provide(service.NewManagementService),
 		fx.Provide(route.NewManagementRoute),
+		fx.Provide(route.NewGatewayRoute),
+		fx.Provide(route.NewStaticRoute),
 		fx.Invoke(run),
 	)
 
@@ -94,34 +96,9 @@ func run(
 	lifecycle fx.Lifecycle,
 	management *service.Management,
 	managementRoute *route.ManagementRoute,
+	gatewayRoute *route.GatewayRoute,
+	staticRoute *route.StaticRoute,
 ) {
-	// static web
-	lifecycle.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			return nil
-		},
-	})
-
-	// gateway service
-	lifecycle.Append(
-		fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				gatewayMux := buildGatewayMux(management)
-
-				if _state.GetGatewayPort() == "" {
-					if err := _state.SetGatewayPort("80"); err != nil {
-						return err
-					}
-				}
-
-				_state.OnGatewayPortChange(func(port string) error {
-					return reloadGateway(port, gatewayMux)
-				})
-
-				return reloadGateway(_state.GetGatewayPort(), gatewayMux)
-			},
-		})
-
 	// management server
 	lifecycle.Append(
 		fx.Hook{
@@ -132,7 +109,7 @@ func run(
 				}
 
 				managementServer := &http.Server{
-					Handler:           managementRoute.GetRoutes(),
+					Handler:           managementRoute.GetRoute(),
 					ReadHeaderTimeout: 5 * time.Second,
 				}
 
@@ -141,11 +118,70 @@ func run(
 					return err
 				}
 
-				log.Printf("management listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
-				return managementServer.Serve(listener)
+				go func() {
+					log.Printf("management listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
+					err := managementServer.Serve(listener)
+					if err != nil {
+						log.Fatalln(err)
+					}
+				}()
+
+				return nil
 			},
 		},
 	)
+
+	// gateway service
+	lifecycle.Append(
+		fx.Hook{
+			OnStart: func(ctx context.Context) error {
+				route := gatewayRoute.GetRoute()
+
+				if _state.GetGatewayPort() == "" {
+					if err := _state.SetGatewayPort("80"); err != nil {
+						return err
+					}
+				}
+
+				_state.OnGatewayPortChange(func(port string) error {
+					return reloadGateway(port, route)
+				})
+
+				return reloadGateway(_state.GetGatewayPort(), route)
+			},
+		})
+
+	// static web
+	lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			listener, err := net.Listen("tcp", "127.1:0")
+			if err != nil {
+				return err
+			}
+
+			staticServer := &http.Server{
+				Handler:           staticRoute.GetRoute(),
+				ReadHeaderTimeout: 5 * time.Second,
+			}
+
+			target := "http://" + listener.Addr().String()
+
+			urlFilePath, err := writeAddressFile(_state.GetRuntimePath(), common.StaticURLFilename, target)
+			if err != nil {
+				return err
+			}
+
+			if err := management.CreateRoute(&common.Route{
+				Path:   "/",
+				Target: target,
+			}); err != nil {
+				return err
+			}
+
+			log.Printf("static server listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
+			return staticServer.Serve(listener)
+		},
+	})
 }
 
 func reloadGateway(port string, route *http.ServeMux) error {
@@ -189,29 +225,6 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	_gateway = gatewayNew
 
 	return nil
-}
-
-func buildGatewayMux(management *service.Management) *http.ServeMux {
-	gatewayMux := http.NewServeMux()
-	gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			if _, err := w.Write([]byte("TODO")); err != nil {
-				log.Println(err)
-			}
-			return
-		}
-
-		proxy := management.GetProxy(r.URL.Path)
-
-		if proxy == nil {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-
-		proxy.ServeHTTP(w, r)
-	})
-
-	return gatewayMux
 }
 
 func checkURL(url string) error {
@@ -277,6 +290,7 @@ func checkPrequisites(state *service.State) error {
 
 func loadConfig(state *service.State) error {
 	viper.SetDefault(configKeyGatewayPort, defaultGatewayPort)
+	viper.SetDefault(configKeyWWWPath, "/var/lib/casaos/www")
 	viper.SetDefault(configKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	viper.SetConfigName("gateway")
@@ -304,6 +318,10 @@ func loadConfig(state *service.State) error {
 	}
 
 	if err := state.SetGatewayPort(viper.GetString(configKeyGatewayPort)); err != nil {
+		return err
+	}
+
+	if err := state.SetWWWPath(viper.GetString(configKeyWWWPath)); err != nil {
 		return err
 	}
 

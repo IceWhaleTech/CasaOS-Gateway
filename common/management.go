@@ -14,6 +14,7 @@ import (
 
 const (
 	ManagementURLFilename = "management.url"
+	StaticURLFilename     = "static.url"
 	APIPath               = "/v1/routes"
 )
 

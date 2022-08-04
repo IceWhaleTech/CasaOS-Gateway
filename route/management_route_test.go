@@ -31,7 +31,7 @@ func setup(t *testing.T) func(t *testing.T) {
 
 	management := service.NewManagementService(_state)
 	managementRoute := NewManagementRoute(management)
-	_router = managementRoute.GetRoutes()
+	_router = managementRoute.GetRoute()
 
 	return func(t *testing.T) {
 		management = nil

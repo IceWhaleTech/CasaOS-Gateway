@@ -22,7 +22,7 @@ func NewManagementRoute(management *service.Management) *ManagementRoute {
 	}
 }
 
-func (m *ManagementRoute) GetRoutes() *gin.Engine {
+func (m *ManagementRoute) GetRoute() *gin.Engine {
 	// check if environment variable is set
 	if ginMode, success := os.LookupEnv("GIN_MODE"); success {
 		gin.SetMode(ginMode)
