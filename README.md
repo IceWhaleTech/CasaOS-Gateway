@@ -54,7 +54,7 @@ Assuming that
 
 Then register the API as follows:
 
-- POST `http://localhost:34703/v1/routes`
+- POST `http://localhost:34703/v1/gateway/routes`
 
   ```json
   {
