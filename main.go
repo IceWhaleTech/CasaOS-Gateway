@@ -26,6 +26,7 @@ const (
 	configKeyWWWPath     = "gateway.WWWPath"
 	configKeyRuntimePath = "common.RuntimePath"
 
+	localhost          = "127.1"
 	defaultGatewayPort = "80"
 )
 
@@ -103,7 +104,7 @@ func run(
 	lifecycle.Append(
 		fx.Hook{
 			OnStart: func(context.Context) error {
-				listener, err := net.Listen("tcp", "127.1:0")
+				listener, err := net.Listen("tcp", net.JoinHostPort(localhost, "0"))
 				if err != nil {
 					return err
 				}
@@ -147,14 +148,21 @@ func run(
 					return reloadGateway(port, route)
 				})
 
-				return reloadGateway(_state.GetGatewayPort(), route)
+				if err := reloadGateway(_state.GetGatewayPort(), route); err != nil {
+					return err
+				}
+
+				return management.CreateRoute(&common.Route{
+					Path:   "/v1/gateway/port",
+					Target: net.JoinHostPort(localhost, _state.GetGatewayPort()),
+				})
 			},
 		})
 
 	// static web
 	lifecycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			listener, err := net.Listen("tcp", "127.1:0")
+			listener, err := net.Listen("tcp", net.JoinHostPort(localhost, "0"))
 			if err != nil {
 				return err
 			}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/common_err"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-contrib/gzip"
@@ -55,15 +56,15 @@ func (m *ManagementRoute) buildV1Group(r *gin.Engine) {
 }
 
 func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
-	v1RoutesGroup := v1Group.Group("/gateway")
+	v1GatewayGroup := v1Group.Group("/gateway")
 
-	v1RoutesGroup.Use()
+	v1GatewayGroup.Use()
 	{
-		v1RoutesGroup.GET("/routes", func(ctx *gin.Context) {
+		v1GatewayGroup.GET("/routes", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, m.management.GetRoutes())
 		})
 
-		v1RoutesGroup.POST("/routes", func(ctx *gin.Context) {
+		v1GatewayGroup.POST("/routes", func(ctx *gin.Context) {
 			var route *common.Route
 			err := ctx.ShouldBindJSON(&route)
 			if err != nil {
@@ -85,7 +86,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			ctx.Status(http.StatusCreated)
 		})
 
-		v1RoutesGroup.GET("/port", func(ctx *gin.Context) {
+		v1GatewayGroup.GET("/port", jwt.JWT(), func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, model.Result{
 				Success: common_err.SUCCESS,
 				Message: common_err.GetMsg(common_err.SUCCESS),
@@ -93,7 +94,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			})
 		})
 
-		v1RoutesGroup.PUT("/port", func(ctx *gin.Context) {
+		v1GatewayGroup.PUT("/port", jwt.JWT(), func(ctx *gin.Context) {
 			var request *common.ChangePortRequest
 
 			if err := ctx.ShouldBindJSON(&request); err != nil {
