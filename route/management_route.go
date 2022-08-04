@@ -37,7 +37,7 @@ func (m *ManagementRoute) GetRoute() *gin.Engine {
 
 	r.GET("/ping", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
-			"message": "pong",
+			"message": "pong from management service",
 		})
 	})
 

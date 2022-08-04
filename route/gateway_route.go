@@ -1,6 +1,7 @@
 package route
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
@@ -19,14 +20,17 @@ func NewGatewayRoute(management *service.Management) *GatewayRoute {
 func (g *GatewayRoute) GetRoute() *http.ServeMux {
 	gatewayMux := http.NewServeMux()
 	gatewayMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/ping" {
+			w.WriteHeader(http.StatusOK)
+			if _, err := w.Write([]byte("pong from gateway service")); err != nil {
+				log.Println(err)
+			}
+			return
+		}
+
 		proxy := g.management.GetProxy(r.URL.Path)
 
 		if proxy == nil {
-			if r.URL.Path == "/" {
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}

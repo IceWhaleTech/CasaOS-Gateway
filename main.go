@@ -26,7 +26,7 @@ const (
 	configKeyWWWPath     = "gateway.WWWPath"
 	configKeyRuntimePath = "common.RuntimePath"
 
-	localhost          = "127.1"
+	localhost          = "127.0.0.1"
 	defaultGatewayPort = "80"
 )
 
@@ -127,7 +127,10 @@ func run(
 					}
 				}()
 
-				return nil
+				return management.CreateRoute(&common.Route{
+					Path:   "/v1/gateway/port",
+					Target: "http://" + listener.Addr().String(),
+				})
 			},
 		},
 	)
@@ -148,14 +151,7 @@ func run(
 					return reloadGateway(port, route)
 				})
 
-				if err := reloadGateway(_state.GetGatewayPort(), route); err != nil {
-					return err
-				}
-
-				return management.CreateRoute(&common.Route{
-					Path:   "/v1/gateway/port",
-					Target: net.JoinHostPort(localhost, _state.GetGatewayPort()),
-				})
+				return reloadGateway(_state.GetGatewayPort(), route)
 			},
 		})
 
@@ -193,7 +189,12 @@ func run(
 }
 
 func reloadGateway(port string, route *http.ServeMux) error {
-	addr := net.JoinHostPort("", port)
+	listener, err := net.Listen("tcp", net.JoinHostPort("", port))
+	if err != nil {
+		return err
+	}
+
+	addr := listener.Addr().String()
 
 	if _gateway != nil && _gateway.Addr == addr {
 		log.Println("port is the same as current running gateway - no change is required")
@@ -208,14 +209,14 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	}
 
 	go func() {
-		err := gatewayNew.ListenAndServe()
+		err := gatewayNew.Serve(listener)
 		if err != nil {
 			log.Println(err)
 		}
 	}()
 
 	// test if gateway is running
-	url := "http://" + gatewayNew.Addr
+	url := "http://" + addr + "/ping"
 	if err := checkURL(url); err != nil {
 		return err
 	}
@@ -239,7 +240,7 @@ func checkURL(url string) error {
 	var response *http.Response
 	var err error
 
-	count := 3
+	count := 10
 
 	for count >= 0 {
 		response, err = http.Get(url) //nolint:gosec
