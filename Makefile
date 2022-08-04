@@ -22,11 +22,14 @@ clean:
 
 install:
 	cp -rv $(BUILD_DIR)/* $(INSTALL_ROOT)
+	if [ ! -f $(INSTALL_ROOT)/etc/casaos/$(APP_NAME_SHORT).ini ]; then \
+		cp -v $(INSTALL_ROOT)/etc/casaos/$(APP_NAME_SHORT).ini.sample $(INSTALL_ROOT)/etc/casaos/$(APP_NAME_SHORT).ini; \
+	fi
 	systemctl enable --now $(APP_NAME).service
 
 uninstall:
 	systemctl disable --now $(APP_NAME).service
-	rm -v $(INSTALL_ROOT)/etc/casaos/$(APP_NAME_SHORT).ini
+	rm -v $(INSTALL_ROOT)/etc/casaos/$(APP_NAME_SHORT).ini.sample
 	rm -v $(INSTALL_ROOT)/usr/bin/$(APP_NAME)
 	rm -v $(INSTALL_ROOT)/usr/lib/systemd/system/$(APP_NAME).service
 
