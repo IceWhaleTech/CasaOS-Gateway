@@ -17,7 +17,6 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
 )
@@ -82,7 +81,7 @@ func main() {
 		fx.Provide(func() *service.Management {
 			return service.NewManagementService(_state)
 		}),
-		fx.Provide(route.NewRoutes),
+		fx.Provide(route.NewManagementRoute),
 		fx.Invoke(run),
 	)
 
@@ -93,9 +92,16 @@ func main() {
 
 func run(
 	lifecycle fx.Lifecycle,
-	route *gin.Engine,
 	management *service.Management,
+	managementRoute *route.ManagementRoute,
 ) {
+	// static web
+	lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return nil
+		},
+	})
+
 	// gateway service
 	lifecycle.Append(
 		fx.Hook{
@@ -126,7 +132,7 @@ func run(
 				}
 
 				managementServer := &http.Server{
-					Handler:           route,
+					Handler:           managementRoute.GetRoutes(),
 					ReadHeaderTimeout: 5 * time.Second,
 				}
 

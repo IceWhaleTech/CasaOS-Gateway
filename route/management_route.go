@@ -12,11 +12,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var _management *service.Management
+type ManagementRoute struct {
+	management *service.Management
+}
 
-func NewRoutes(management *service.Management) *gin.Engine {
-	_management = management
+func NewManagementRoute(management *service.Management) *ManagementRoute {
+	return &ManagementRoute{
+		management: management,
+	}
+}
 
+func (m *ManagementRoute) GetRoutes() *gin.Engine {
 	// check if environment variable is set
 	if ginMode, success := os.LookupEnv("GIN_MODE"); success {
 		gin.SetMode(ginMode)
@@ -34,27 +40,27 @@ func NewRoutes(management *service.Management) *gin.Engine {
 		})
 	})
 
-	buildV1Group(r)
+	m.buildV1Group(r)
 
 	return r
 }
 
-func buildV1Group(r *gin.Engine) {
+func (m *ManagementRoute) buildV1Group(r *gin.Engine) {
 	v1Group := r.Group("/v1")
 
 	v1Group.Use()
 	{
-		buildV1RouteGroup(v1Group)
+		m.buildV1RouteGroup(v1Group)
 	}
 }
 
-func buildV1RouteGroup(v1Group *gin.RouterGroup) {
+func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 	v1RoutesGroup := v1Group.Group("/gateway")
 
 	v1RoutesGroup.Use()
 	{
 		v1RoutesGroup.GET("/routes", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, _management.GetRoutes())
+			ctx.JSON(http.StatusOK, m.management.GetRoutes())
 		})
 
 		v1RoutesGroup.POST("/routes", func(ctx *gin.Context) {
@@ -68,7 +74,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 				return
 			}
 
-			if err := _management.CreateRoute(route); err != nil {
+			if err := m.management.CreateRoute(route); err != nil {
 				ctx.JSON(http.StatusInternalServerError, model.Result{
 					Success: common_err.SERVICE_ERROR,
 					Message: err.Error(),
@@ -83,7 +89,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, model.Result{
 				Success: common_err.SUCCESS,
 				Message: common_err.GetMsg(common_err.SUCCESS),
-				Data:    _management.GetGatewayPort(),
+				Data:    m.management.GetGatewayPort(),
 			})
 		})
 
@@ -98,7 +104,7 @@ func buildV1RouteGroup(v1Group *gin.RouterGroup) {
 				return
 			}
 
-			if err := _management.SetGatewayPort(request.Port); err != nil {
+			if err := m.management.SetGatewayPort(request.Port); err != nil {
 				ctx.JSON(http.StatusInternalServerError, model.Result{
 					Success: common_err.SERVICE_ERROR,
 					Message: err.Error(),
