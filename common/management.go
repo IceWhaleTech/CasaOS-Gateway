@@ -15,7 +15,7 @@ import (
 const (
 	ManagementURLFilename = "management.url"
 	StaticURLFilename     = "static.url"
-	APIPath               = "/v1/routes"
+	APIPath               = "/v1/gateway/routes"
 )
 
 type ManagementService interface {
