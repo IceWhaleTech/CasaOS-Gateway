@@ -8,8 +8,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
@@ -112,7 +114,14 @@ func TestChangePort(t *testing.T) {
 		t.Error(err)
 	}
 
+	token, err := jwt.GenerateToken("test", "test", 0, "casaos", 10*time.Second)
+	if err != nil {
+		t.Error(err)
+	}
+
 	req, _ := http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
+	req.Header.Set("Authorization", token)
+
 	w := httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
 
@@ -121,6 +130,8 @@ func TestChangePort(t *testing.T) {
 
 	// get
 	req, _ = http.NewRequest(http.MethodGet, "/v1/gateway/port", nil)
+	req.Header.Set("Authorization", token)
+
 	w = httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
 
