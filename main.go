@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,6 +23,8 @@ import (
 )
 
 const (
+	version = "0.3.5"
+
 	configKeyGatewayPort = "gateway.Port"
 	configKeyWWWPath     = "gateway.WWWPath"
 	configKeyRuntimePath = "common.RuntimePath"
@@ -36,6 +39,14 @@ var (
 )
 
 func init() {
+	versionFlag := flag.Bool("v", false, "version")
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println(version)
+		os.Exit(0)
+	}
+
 	_state = service.NewState()
 
 	if err := loadConfig(_state); err != nil {
