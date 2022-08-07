@@ -18,10 +18,8 @@ builds:
     goarm:
       - 7
 archives:
-  - replacements:
-      linux: Linux
-      amd64: x86_64
-      arm64: arm64
+  - name_template: "{{ .Os }}-{{ .Arch }}-{{ .ProjectName }}"
+    replacements:
       arm: arm-7
     files:
       - build/**/*
@@ -35,3 +33,11 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+release:
+  github:
+    owner: IceWhaleTech
+    repo: CasaOS-Gateway
+    draft: true
+    prerelease: auto
+    mode: replace
+    name_template: "v{{ .Version }}"
