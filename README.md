@@ -1,6 +1,6 @@
 # CasaOS-Gateway
 
-[![goreleaser](https://github.com/IceWhaleTech/CasaOS-Gateway/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/IceWhaleTech/CasaOS-Gateway/actions/workflows/release.yml)
+[![goreleaser](https://github.com/IceWhaleTech/CasaOS-Gateway/actions/workflows/release.yml/badge.svg)](https://github.com/IceWhaleTech/CasaOS-Gateway/actions/workflows/release.yml)
 
 CasaOS Gateway is a dynamic API gateway service that can be used to expose APIs from different other HTTP based services.
 
