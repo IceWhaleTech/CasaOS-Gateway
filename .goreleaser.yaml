@@ -1,0 +1,43 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+project_name: casaos-gateway
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+builds:
+  - binary: build/usr/bin/casaos-gateway
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+archives:
+  - name_template: "{{ .Os }}-{{ .Arch }}-{{ .ProjectName }}"
+    replacements:
+      arm: arm-7
+    files:
+      - build/**/*
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-snapshot"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+release:
+  github:
+    owner: IceWhaleTech
+    name: CasaOS-Gateway
+  draft: true
+  prerelease: auto
+  mode: replace
+  name_template: "v{{ .Version }}"
