@@ -27,3 +27,5 @@ target/
 .vscode/
 __debug_bin
 
+
+dist/
