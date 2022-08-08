@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -e 
+
+INSTALL_ROOT=${1:-/}
+
 APP_NAME_SHORT=gateway
 
 __get_setup_script_directory_by_os_release() {
@@ -34,13 +38,17 @@ __get_setup_script_directory_by_os_release() {
 	popd >/dev/null
 }
 
-set -e
-
 SETUP_SCRIPT_DIRECTORY="$(__get_setup_script_directory_by_os_release)"
 SETUP_SCRIPT_FILENAME="setup-${APP_NAME_SHORT}.sh"
 
 SETUP_SCRIPT_FILEPATH="${SETUP_SCRIPT_DIRECTORY}/${SETUP_SCRIPT_FILENAME}"
 
-echo "✅ Running ${SETUP_SCRIPT_FILEPATH}..."
+{
+    echo "🟩 Running ${SETUP_SCRIPT_FILENAME}..."
+    $SHELL "${SETUP_SCRIPT_FILEPATH}" "${INSTALL_ROOT}"
+} || {
+    echo "🟥 ${SETUP_SCRIPT_FILENAME} failed."
+    exit 1
+}
 
-$SHELL "${SETUP_SCRIPT_FILEPATH}" | sed  "s/^/[${SETUP_SCRIPT_FILENAME}] /"
+echo "✅ ${SETUP_SCRIPT_FILENAME} finished."
