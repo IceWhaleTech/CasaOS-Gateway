@@ -17,4 +17,7 @@ if [ ! -f "${CONF_FILE}" ]; then \
 fi
 
 echo "Enabling service..."
-systemctl enable --now --force --no-ask-password "${APP_NAME}.service"
+systemctl enable --force --no-ask-password "${APP_NAME}.service"
+
+echo "Starting service..."
+systemctl start --force --no-ask-password "${APP_NAME}.service"
