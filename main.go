@@ -23,8 +23,6 @@ import (
 )
 
 const (
-	version = "0.3.5"
-
 	configKeyGatewayPort = "gateway.Port"
 	configKeyWWWPath     = "gateway.WWWPath"
 	configKeyRuntimePath = "common.RuntimePath"
@@ -43,7 +41,7 @@ func init() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println(version)
+		fmt.Println(common.Version)
 		os.Exit(0)
 	}
 
