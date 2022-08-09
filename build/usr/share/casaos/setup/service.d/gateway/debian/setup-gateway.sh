@@ -18,7 +18,8 @@ VERSION="$($BIN_FILE -v)"
 VERSION_PATH=${INSTALL_ROOT}/var/lib/casaos
 VERSION_FILE=${VERSION_PATH}/${APP_NAME_SHORT}-version
 
-echo "${VERSION}" | tee "${VERSION_FILE}"
+echo "Writing version number '${VERSION}' to ${VERSION_FILE}..."
+echo "${VERSION}" > "${VERSION_FILE}"
 
 if [ ! -f "${CONF_FILE}" ]; then \
     echo "Initializing config file..."
