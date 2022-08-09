@@ -6,7 +6,21 @@ before:
     # You may remove this if you don't use go modules.
     - go mod tidy
 builds:
-  - binary: build/usr/bin/casaos-gateway
+  - id: casaos-gateway
+    binary: build/usr/bin/casaos-gateway
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+  - id: casaos-gateway-updater
+    binary: build/usr/bin/casaos-gateway-updater
+    main: ./cmd/updater
     env:
       - CGO_ENABLED=0
     goos:
