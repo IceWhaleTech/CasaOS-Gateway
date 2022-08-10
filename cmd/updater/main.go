@@ -30,11 +30,16 @@ func init() {
 
 func main() {
 	updaters := []interfaces.Updater{
-		NewUpdater03x(),
+		NewUpdater033to035(),
 	}
 
 	for _, updater := range updaters {
-		if !updater.IsMigrationNeeded() {
+		migrationNeeded, err := updater.IsMigrationNeeded()
+		if err != nil {
+			panic(err)
+		}
+
+		if !migrationNeeded {
 			continue
 		}
 
