@@ -3,12 +3,13 @@ module github.com/IceWhaleTech/CasaOS-Gateway
 go 1.18
 
 require (
-	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220804224534-081d69c201cc
+	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220809202353-f45c5935ce5f
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/spf13/viper v1.12.0
 	go.uber.org/fx v1.17.1
+	gopkg.in/ini.v1 v1.66.4
 	gotest.tools v2.2.0+incompatible
 )
 
@@ -47,7 +48,6 @@ require (
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
