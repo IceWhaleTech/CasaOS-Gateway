@@ -2,8 +2,10 @@ package main
 
 import (
 	interfaces "github.com/IceWhaleTech/CasaOS-Common"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/file"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/systemctl"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/version"
+	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"gopkg.in/ini.v1"
 )
 
@@ -42,9 +44,10 @@ func (u *updater033to035) PreMigrate() error {
 		return err
 	}
 
-	// setup new gateway config file
-	gatewayConfigSampleFilePath := "/etc/casaos/gateway.ini.sample"
-	gatewayConfigFilePath := "/etc/casaos/gateway.ini"
+	// setup new gateway config file if it doesn't exist
+	if err := file.CopyFile(gatewayConfigSampleFilePath, gatewayConfigFilePath, "skip"); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -52,24 +55,36 @@ func (u *updater033to035) PreMigrate() error {
 func (u *updater033to035) Migrate() error {
 	_logger.Info("Executing migration steps for CasaoS version between 0.3.3 to 0.3.5...")
 
-	// load config file
-	configFile, err := ini.Load(version.LegacyCasaOSConfigFilePath)
+	// load legacy config file
+	legacyConfigFile, err := ini.Load(version.LegacyCasaOSConfigFilePath)
 	if err != nil {
 		return err
 	}
 
-	key, err := configFile.Section("server").GetKey("HttpPort")
+	key, err := legacyConfigFile.Section("server").GetKey("HttpPort")
 	if err != nil {
 		return err
 	}
 
 	httpPort := key.Value()
 
-	return nil
+	newConfigFile, err := common.LoadConfig()
+	if err != nil {
+		return err
+	}
+
+	newConfigFile.Set(common.ConfigKeyGatewayPort, httpPort)
+	return newConfigFile.WriteConfig()
 }
 
 func (u *updater033to035) PostMigrate() error {
 	_logger.Info("Executing steps after migration for CasaoS version between 0.3.3 to 0.3.5...")
+
+	// enable new gateway service
+	if err := systemctl.EnableService(gatewayServiceName); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -9,6 +9,12 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 )
 
+const (
+	gatewayConfigSampleFilePath = "/etc/casaos/gateway.ini.sample"
+	gatewayConfigFilePath       = "/etc/casaos/gateway.ini"
+	gatewayServiceName          = "casaos-gateway.service"
+)
+
 var _logger *Logger
 
 func init() {
