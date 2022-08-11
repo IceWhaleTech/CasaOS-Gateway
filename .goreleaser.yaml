@@ -35,9 +35,9 @@ builds:
       - arm
     goarm:
       - 7
-  - id: casaos-gateway-updater-amd64
-    binary: build/usr/bin/casaos-gateway-updater
-    main: ./cmd/updater
+  - id: casaos-gateway-migration-tool-amd64
+    binary: build/usr/bin/casaos-gateway-migration-tool
+    main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
       - CC=x86_64-linux-gnu-gcc-11
@@ -45,9 +45,9 @@ builds:
       - linux
     goarch:
       - amd64
-  - id: casaos-gateway-updater-arm64
-    binary: build/usr/bin/casaos-gateway-updater
-    main: ./cmd/updater
+  - id: casaos-gateway-migration-tool-arm64
+    binary: build/usr/bin/casaos-gateway-migration-tool
+    main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
       - CC=aarch64-linux-gnu-gcc-11
@@ -55,9 +55,9 @@ builds:
       - linux
     goarch:
       - arm64
-  - id: casaos-gateway-updater-arm-7
-    binary: build/usr/bin/casaos-gateway-updater
-    main: ./cmd/updater
+  - id: casaos-gateway-migration-tool-arm-7
+    binary: build/usr/bin/casaos-gateway-migration-tool
+    main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
       - CC=arm-linux-gnueabihf-gcc-11
