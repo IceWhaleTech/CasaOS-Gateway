@@ -6,28 +6,62 @@ before:
     # You may remove this if you don't use go modules.
     - go mod tidy
 builds:
-  - id: casaos-gateway
+  - id: casaos-gateway-amd64
     binary: build/usr/bin/casaos-gateway
     env:
-      - CGO_ENABLED=0
+      - CGO_ENABLED=1
+      - CC=x86_64-linux-gnu-gcc-11
     goos:
       - linux
     goarch:
       - amd64
+  - id: casaos-gateway-arm64
+    binary: build/usr/bin/casaos-gateway
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
       - arm64
+  - id: casaos-gateway-arm-7
+    binary: build/usr/bin/casaos-gateway
+    env:
+      - CGO_ENABLED=1
+      - CC=arm-linux-gnueabihf-gcc-11
+    goos:
+      - linux
+    goarch:
       - arm
     goarm:
       - 7
-  - id: casaos-gateway-updater
+  - id: casaos-gateway-updater-amd64
     binary: build/usr/bin/casaos-gateway-updater
     main: ./cmd/updater
     env:
-      - CGO_ENABLED=0
+      - CGO_ENABLED=1
+      - CC=x86_64-linux-gnu-gcc-11
     goos:
       - linux
     goarch:
       - amd64
+  - id: casaos-gateway-updater-arm64
+    binary: build/usr/bin/casaos-gateway-updater
+    main: ./cmd/updater
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
       - arm64
+  - id: casaos-gateway-updater-arm-7
+    binary: build/usr/bin/casaos-gateway-updater
+    main: ./cmd/updater
+    env:
+      - CGO_ENABLED=1
+      - CC=arm-linux-gnueabihf-gcc-11
+    goos:
+      - linux
+    goarch:
       - arm
     goarm:
       - 7

@@ -38,13 +38,13 @@ func (u *updater033to035) IsMigrationNeeded() (bool, error) {
 func (u *updater033to035) PreMigrate() error {
 	_logger.Info("Executing steps before migration for CasaoS version between 0.3.3 to 0.3.5...")
 
-	// disable legacy CasaOS service
+	_logger.Info("Disabling legacy %s...", version.LegacyCasaOSServiceName)
 	err := systemctl.DisableService(version.LegacyCasaOSServiceName)
 	if err != nil {
 		return err
 	}
 
-	// setup new gateway config file if it doesn't exist
+	_logger.Info("Setting %s if it doesn't exist...", gatewayConfigFilePath)
 	if err := file.CopyFile(gatewayConfigSampleFilePath, gatewayConfigFilePath, "skip"); err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (u *updater033to035) PreMigrate() error {
 func (u *updater033to035) Migrate() error {
 	_logger.Info("Executing migration steps for CasaoS version between 0.3.3 to 0.3.5...")
 
-	// load legacy config file
+	_logger.Info("Loading legacy %s...", version.LegacyCasaOSConfigFilePath)
 	legacyConfigFile, err := ini.Load(version.LegacyCasaOSConfigFilePath)
 	if err != nil {
 		return err
@@ -73,6 +73,7 @@ func (u *updater033to035) Migrate() error {
 		return err
 	}
 
+	_logger.Info("Updating %s to be '%s' in %s...", common.ConfigKeyGatewayPort, httpPort, gatewayConfigFilePath)
 	newConfigFile.Set(common.ConfigKeyGatewayPort, httpPort)
 	return newConfigFile.WriteConfig()
 }
@@ -81,6 +82,7 @@ func (u *updater033to035) PostMigrate() error {
 	_logger.Info("Executing steps after migration for CasaoS version between 0.3.3 to 0.3.5...")
 
 	// enable new gateway service
+	_logger.Info("Enabling %s...", gatewayServiceName)
 	if err := systemctl.EnableService(gatewayServiceName); err != nil {
 		return err
 	}

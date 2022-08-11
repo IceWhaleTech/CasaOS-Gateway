@@ -44,27 +44,35 @@ func main() {
 		NewUpdater033to035(),
 	}
 
+	var selectedUpdater interfaces.Updater
+
+	// look for the right updater matching current version
 	for _, updater := range updaters {
 		migrationNeeded, err := updater.IsMigrationNeeded()
 		if err != nil {
 			panic(err)
 		}
 
-		if !migrationNeeded {
-			continue
+		if migrationNeeded {
+			selectedUpdater = updater
+			break
 		}
+	}
 
-		if err := updater.PreMigrate(); err != nil {
-			panic(err)
-		}
+	if selectedUpdater == nil {
+		_logger.Info("No migration to proceed.")
+		return
+	}
 
-		if err := updater.Migrate(); err != nil {
-			panic(err)
-		}
+	if err := selectedUpdater.PreMigrate(); err != nil {
+		panic(err)
+	}
 
-		if err := updater.PostMigrate(); err != nil {
-			panic(err)
-		}
+	if err := selectedUpdater.Migrate(); err != nil {
+		panic(err)
+	}
 
+	if err := selectedUpdater.PostMigrate(); err != nil {
+		panic(err)
 	}
 }
