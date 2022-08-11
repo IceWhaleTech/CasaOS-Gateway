@@ -21,11 +21,16 @@ func init() {
 		os.Exit(0)
 	}
 
-	if *debugFlag {
-		_logger.DebugMode = true
+	if os.Getuid() != 0 {
+		_logger.Info("Root privileges are required to run this program.")
+		os.Exit(1)
 	}
 
 	_logger = NewLogger()
+
+	if *debugFlag {
+		_logger.DebugMode = true
+	}
 }
 
 func main() {
