@@ -44,7 +44,7 @@ func (u *updater033to035) PreMigrate() error {
 		return err
 	}
 
-	_logger.Info("Setting %s if it doesn't exist...", gatewayConfigFilePath)
+	_logger.Info("Copying %s to %s if it doesn't exist...", gatewayConfigSampleFilePath, gatewayConfigFilePath)
 	if err := file.CopyFile(gatewayConfigSampleFilePath, gatewayConfigFilePath, "skip"); err != nil {
 		return err
 	}
