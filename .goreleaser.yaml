@@ -7,7 +7,7 @@ before:
     - go mod tidy
 builds:
   - id: casaos-gateway-amd64
-    binary: build/usr/bin/casaos-gateway
+    binary: build/sysroot/usr/bin/casaos-gateway
     env:
       - CGO_ENABLED=1
       - CC=x86_64-linux-gnu-gcc-11
@@ -16,7 +16,7 @@ builds:
     goarch:
       - amd64
   - id: casaos-gateway-arm64
-    binary: build/usr/bin/casaos-gateway
+    binary: build/sysroot/usr/bin/casaos-gateway
     env:
       - CGO_ENABLED=1
       - CC=aarch64-linux-gnu-gcc-11
@@ -25,7 +25,7 @@ builds:
     goarch:
       - arm64
   - id: casaos-gateway-arm-7
-    binary: build/usr/bin/casaos-gateway
+    binary: build/sysroot/usr/bin/casaos-gateway
     env:
       - CGO_ENABLED=1
       - CC=arm-linux-gnueabihf-gcc-11
@@ -36,7 +36,7 @@ builds:
     goarm:
       - 7
   - id: casaos-gateway-migration-tool-amd64
-    binary: build/usr/bin/casaos-gateway-migration-tool
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
@@ -46,7 +46,7 @@ builds:
     goarch:
       - amd64
   - id: casaos-gateway-migration-tool-arm64
-    binary: build/usr/bin/casaos-gateway-migration-tool
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
@@ -56,7 +56,7 @@ builds:
     goarch:
       - arm64
   - id: casaos-gateway-migration-tool-arm-7
-    binary: build/usr/bin/casaos-gateway-migration-tool
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
@@ -86,8 +86,6 @@ archives:
       - casaos-gateway-migration-tool-arm-7
     replacements:
       arm: arm-7
-    files:
-      - build/**/*
 checksum:
   name_template: 'checksums.txt'
 snapshot:
