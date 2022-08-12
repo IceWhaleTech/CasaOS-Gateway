@@ -6,7 +6,7 @@ INSTALL_ROOT=${1:-/}
 
 APP_NAME_SHORT=gateway
 
-__get_setup_script_directory_by_os_release() {
+__get_cleanup_script_directory_by_os_release() {
 	pushd "$(dirname "${BASH_SOURCE[0]}")/../service.d/${APP_NAME_SHORT}" >/dev/null
 
 	{
@@ -38,17 +38,17 @@ __get_setup_script_directory_by_os_release() {
 	popd >/dev/null
 }
 
-SETUP_SCRIPT_DIRECTORY="$(__get_setup_script_directory_by_os_release)"
-SETUP_SCRIPT_FILENAME="setup-${APP_NAME_SHORT}.sh"
+CLEANUP_SCRIPT_DIRECTORY="$(__get_cleanup_script_directory_by_os_release)"
+CLEANUP_SCRIPT_FILENAME="cleanup-${APP_NAME_SHORT}.sh"
 
-SETUP_SCRIPT_FILEPATH="${SETUP_SCRIPT_DIRECTORY}/${SETUP_SCRIPT_FILENAME}"
+CLEANUP_SCRIPT_FILEPATH="${CLEANUP_SCRIPT_DIRECTORY}/${CLEANUP_SCRIPT_FILENAME}"
 
 {
-    echo "🟩 Running ${SETUP_SCRIPT_FILENAME}..."
-    $SHELL "${SETUP_SCRIPT_FILEPATH}" "${INSTALL_ROOT}"
+    echo "🟩 Running ${CLEANUP_SCRIPT_FILENAME}..."
+    $SHELL "${CLEANUP_SCRIPT_FILEPATH}" "${INSTALL_ROOT}"
 } || {
-    echo "🟥 ${SETUP_SCRIPT_FILENAME} failed."
+    echo "🟥 ${CLEANUP_SCRIPT_FILENAME} failed."
     exit 1
 }
 
-echo "✅ ${SETUP_SCRIPT_FILENAME} finished."
+echo "✅ ${CLEANUP_SCRIPT_FILENAME} finished."
