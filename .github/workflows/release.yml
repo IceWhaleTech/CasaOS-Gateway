@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       -
         name: Install dependencies for cross-compiling
@@ -18,8 +18,8 @@ jobs:
           sudo apt update 
           sudo apt-get --no-install-recommends --yes install \
             libc6-dev-amd64-cross \
-            gcc-10-aarch64-linux-gnu libc6-dev-arm64-cross \
-            gcc-10-arm-linux-gnueabihf libc6-dev-armhf-cross
+            gcc-11-aarch64-linux-gnu libc6-dev-arm64-cross \
+            gcc-11-arm-linux-gnueabihf libc6-dev-armhf-cross
       -
         name: Checkout
         uses: actions/checkout@v2
