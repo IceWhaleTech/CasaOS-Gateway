@@ -68,7 +68,22 @@ builds:
     goarm:
       - 7
 archives:
-  - name_template: "{{ .Os }}-{{ .Arch }}-{{ .ProjectName }}"
+  - name_template: "{{ .Os }}-{{ .Arch }}-{{ .ProjectName }}-v{{ .Version }}"
+    id: casaos-gateway
+    builds:
+      - casaos-gateway-amd64
+      - casaos-gateway-arm64
+      - casaos-gateway-arm-7
+    replacements:
+      arm: arm-7
+    files:
+      - build/**/*
+  - name_template: "{{ .Os }}-{{ .Arch }}-{{ .ProjectName }}-migration-tool-v{{ .Version }}"
+    id: casaos-gateway-migration-tool
+    builds:
+      - casaos-gateway-migration-tool-amd64
+      - casaos-gateway-migration-tool-arm64
+      - casaos-gateway-migration-tool-arm-7
     replacements:
       arm: arm-7
     files:
