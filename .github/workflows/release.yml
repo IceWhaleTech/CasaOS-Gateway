@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
+        name: Install dependencies for cross-compiling
+        run: |
+          sudo apt-get --no-install-recommends --yes install \
+            libc6-dev-amd64-cross \
+            gcc-11-aarch64-linux-gnu libc6-dev-arm64-cross \
+            gcc-11-arm-linux-gnueabihf libc6-dev-armhf-cross
+      -
         name: Checkout
         uses: actions/checkout@v2
         with:
