@@ -10,7 +10,7 @@ builds:
     binary: build/usr/bin/casaos-gateway
     env:
       - CGO_ENABLED=1
-      - CC=x86_64-linux-gnu-gcc-11
+      - CC=x86_64-linux-gnu-gcc-10
     goos:
       - linux
     goarch:
@@ -19,7 +19,7 @@ builds:
     binary: build/usr/bin/casaos-gateway
     env:
       - CGO_ENABLED=1
-      - CC=aarch64-linux-gnu-gcc-11
+      - CC=aarch64-linux-gnu-gcc-10
     goos:
       - linux
     goarch:
@@ -28,7 +28,7 @@ builds:
     binary: build/usr/bin/casaos-gateway
     env:
       - CGO_ENABLED=1
-      - CC=arm-linux-gnueabihf-gcc-11
+      - CC=arm-linux-gnueabihf-gcc-10
     goos:
       - linux
     goarch:
@@ -40,7 +40,7 @@ builds:
     main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
-      - CC=x86_64-linux-gnu-gcc-11
+      - CC=x86_64-linux-gnu-gcc-10
     goos:
       - linux
     goarch:
@@ -50,7 +50,7 @@ builds:
     main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
-      - CC=aarch64-linux-gnu-gcc-11
+      - CC=aarch64-linux-gnu-gcc-10
     goos:
       - linux
     goarch:
@@ -60,7 +60,7 @@ builds:
     main: ./cmd/migration-tool
     env:
       - CGO_ENABLED=1
-      - CC=arm-linux-gnueabihf-gcc-11
+      - CC=arm-linux-gnueabihf-gcc-10
     goos:
       - linux
     goarch:
