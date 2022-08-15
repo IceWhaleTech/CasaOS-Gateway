@@ -9,7 +9,7 @@ SOURCE_ROOT=${BUILD_PATH}/sysroot
 APP_NAME="casaos-gateway"
 APP_NAME_SHORT="gateway"
 
-MIGRATION_SCRIPT_PATH=${BUILD_PATH}/scripts/migration/script.d/01-migrate-gateway.sh
+MIGRATION_SCRIPT_PATH=${BUILD_PATH}/scripts/migration/script.d/01-migrate-${APP_NAME_SHORT}.sh
 
 $SHELL "${MIGRATION_SCRIPT_PATH}"
 
