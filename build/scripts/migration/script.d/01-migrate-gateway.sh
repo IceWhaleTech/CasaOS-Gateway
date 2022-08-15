@@ -18,11 +18,11 @@ __is_migration_needed() {
         return 1
     fi
 
-    if [ "CURRENT_VERSION_NOT_FOUND" = "${version2}" ]; then
+    if [ "CURRENT_VERSION_NOT_FOUND" = "${version1}" ]; then
         return 1
     fi
 
-    if [ "LEGACY_WITHOUT_VERSION" = "${version2}" ]; then
+    if [ "LEGACY_WITHOUT_VERSION" = "${version1}" ]; then
         return 0
     fi
 
@@ -46,6 +46,9 @@ CURRENT_BIN_FILE_LEGACY=$(realpath -e ${CURRENT_BIN_PATH}/${APP_NAME_LEGACY} || 
 
 SOURCE_VERSION="$(${SOURCE_BIN_FILE} -v)"
 CURRENT_VERSION="$(${CURRENT_BIN_FILE} -v || ${CURRENT_BIN_FILE_LEGACY} -v || (stat "${CURRENT_BIN_FILE_LEGACY}" > /dev/null && echo LEGACY_WITHOUT_VERSION) || echo CURRENT_VERSION_NOT_FOUND)"
+
+echo "CURRENT_VERSION: ${CURRENT_VERSION}"
+echo "SOURCE_VERSION: ${SOURCE_VERSION}"
 
 NEED_MIGRATION=$(__is_migration_needed "${CURRENT_VERSION}" "${SOURCE_VERSION}" && echo "true" || echo "false")
 

@@ -86,6 +86,8 @@ archives:
       - casaos-gateway-migration-tool-arm-7
     replacements:
       arm: arm-7
+    files:
+      - build/sysroot/etc/**/*
 checksum:
   name_template: 'checksums.txt'
 snapshot:
