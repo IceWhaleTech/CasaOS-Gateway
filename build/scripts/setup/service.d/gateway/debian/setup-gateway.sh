@@ -3,19 +3,8 @@
 set -e
 
 ## base variables
-BUILD_PATH=${1:?missing build path}
-SOURCE_ROOT=${BUILD_PATH}/sysroot
-
 APP_NAME="casaos-gateway"
 APP_NAME_SHORT="gateway"
-
-MIGRATION_SCRIPT_PATH=${BUILD_PATH}/scripts/migration/script.d/01-migrate-${APP_NAME_SHORT}.sh
-
-$SHELL "${MIGRATION_SCRIPT_PATH}"
-
-# copy sysroot over
-
-cp -rv "${SOURCE_ROOT}"/* /
 
 # copy config files
 CONF_PATH=/etc/casaos
@@ -28,6 +17,7 @@ if [ ! -f "${CONF_FILE}" ]; then \
 fi
 
 # enable and start service
+systemctl daemon-reload
 
 echo "Enabling service..."
 systemctl enable --force --no-ask-password "${APP_NAME}.service"
