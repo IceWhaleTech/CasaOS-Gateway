@@ -73,7 +73,7 @@ while read -r VERSION_PAIR; do
     VER1=$(echo "${VERSION_PAIR}" | cut -d' ' -f1)
     VER2=$(echo "${VERSION_PAIR}" | cut -d' ' -f2)
 
-    if [ "${CURRENT_VERSION}" = "${VER1// /}" ]; then
+    if [ "v${CURRENT_VERSION}" = "${VER1// /}" ]; then
         CURRENT_VERSION_FOUND="true"
     fi
 
@@ -125,7 +125,7 @@ pushd "${MIGRATION_SERVICE_DIR}"
         echo "Extracting ${MIGRATION_TOOL_FILE}..."
         tar zxvf "${MIGRATION_TOOL_FILE}"
 
-        MIGRATION_TOOL_PATH=build/usr/bin/${APP_NAME}-migration-tool
+        MIGRATION_TOOL_PATH=build/sysroot/usr/bin/${APP_NAME}-migration-tool
         echo "Running ${MIGRATION_TOOL_PATH}..."
         ${MIGRATION_TOOL_PATH}
     done
