@@ -33,6 +33,8 @@ BUILD_PATH=$(dirname "${BASH_SOURCE[0]}")/../../..
 SOURCE_ROOT=${BUILD_PATH}/sysroot
 
 APP_NAME="casaos-gateway"
+APP_NAME_FORMAL="CasaOS-Gateway"
+APP_NAME_SHORT="gateway"
 APP_NAME_LEGACY="casaos"
 
 # check if migration is needed
@@ -57,4 +59,80 @@ if [ "${NEED_MIGRATION}" = "false" ]; then
     exit 0
 fi
 
-echo TODO: migrate "${CURRENT_VERSION}" to "${SOURCE_VERSION}"
+MIGRATION_SERVICE_DIR=${BUILD_PATH}/scripts/migration/service.d/${APP_NAME_SHORT}
+MIGRATION_LIST_FILE=${MIGRATION_SERVICE_DIR}/migration.list
+MIGRATION_PATH=()
+
+CURRENT_VERSION_FOUND="false"
+
+while read -r VERSION_PAIR; do
+    if [ -z "${VERSION_PAIR}" ]; then
+        continue
+    fi
+
+    VER1=$(echo "${VERSION_PAIR}" | cut -d' ' -f1)
+    VER2=$(echo "${VERSION_PAIR}" | cut -d' ' -f2)
+
+    if [ "${CURRENT_VERSION}" = "${VER1// /}" ]; then
+        CURRENT_VERSION_FOUND="true"
+    fi
+
+    if [ "${CURRENT_VERSION_FOUND}" = "true" ]; then
+        MIGRATION_PATH+=("${VER2// /}")
+    fi
+done < "${MIGRATION_LIST_FILE}"
+
+if [ ${#MIGRATION_PATH[@]} -eq 0 ]; then
+    echo "🟨 No migration path found from ${CURRENT_VERSION} to ${SOURCE_VERSION}"
+    exit 0
+fi
+
+ARCH="unknown"
+
+case $(uname -m) in
+    x86_64)
+        ARCH="amd64"
+        ;;
+    aarch64)
+        ARCH="arm64"
+        ;;
+    armv7l)
+        ARCH="arm-7"
+        ;;
+    *)
+        echo "Unsupported architecture"
+        exit 1
+        ;;
+esac
+
+pushd "${MIGRATION_SERVICE_DIR}"
+
+{
+    for VER2 in "${MIGRATION_PATH[@]}"; do
+        MIGRATION_TOOL_URL=https://github.com/IceWhaleTech/"${APP_NAME_FORMAL}"/releases/download/"${VER2}"/linux-"${ARCH}"-"${APP_NAME}"-migration-tool-"${VER2}".tar.gz
+        echo "Dowloading ${MIGRATION_TOOL_URL}..."
+        curl -sL -O "${MIGRATION_TOOL_URL}"
+    done
+} || {
+    echo "🟥 Failed to download migration tools"
+    popd
+    exit 1
+}
+
+{
+    for VER2 in "${MIGRATION_PATH[@]}"; do
+        MIGRATION_TOOL_FILE=linux-"${ARCH}"-"${APP_NAME}"-migration-tool-"${VER2}".tar.gz
+        echo "Extracting ${MIGRATION_TOOL_FILE}..."
+        tar zxvf "${MIGRATION_TOOL_FILE}"
+
+        MIGRATION_TOOL_PATH=build/usr/bin/${APP_NAME}-migration-tool
+        echo "Running ${MIGRATION_TOOL_PATH}..."
+        ${MIGRATION_TOOL_PATH}
+    done
+} || {
+    echo "🟥 Failed to extract and run migration tools"
+    popd
+    exit 1
+}
+
+popd
