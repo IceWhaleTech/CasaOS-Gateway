@@ -48,7 +48,7 @@ SETUP_SCRIPT_FILEPATH="${SETUP_SCRIPT_DIRECTORY}/${SETUP_SCRIPT_FILENAME}"
     $SHELL "${SETUP_SCRIPT_FILEPATH}" "${BUILD_PATH}"
 } || {
     echo "🟥 ${SETUP_SCRIPT_FILENAME} failed."
-    false
+    return 1
 }
 
 echo "✅ ${SETUP_SCRIPT_FILENAME} finished."
