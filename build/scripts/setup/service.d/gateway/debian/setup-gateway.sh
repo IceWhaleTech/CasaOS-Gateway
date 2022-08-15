@@ -15,7 +15,7 @@ $SHELL "${MIGRATION_SCRIPT_PATH}"
 
 # copy sysroot over
 
-cp -rv "${SOURCE_ROOT}/*" /
+cp -rv "${SOURCE_ROOT}"/* /
 
 # copy config files
 CONF_PATH=/etc/casaos
