@@ -16,6 +16,7 @@ builds:
       - -w
       - -extldflags "-static"
     tags:
+      - musl
       - netgo
     goos:
       - linux
@@ -34,6 +35,7 @@ builds:
       - -w
       - -extldflags "-static"
     tags:
+      - musl
       - netgo
     goos:
       - linux
@@ -52,6 +54,7 @@ builds:
       - -w
       - -extldflags "-static"
     tags:
+      - musl
       - netgo
     goos:
       - linux
@@ -73,6 +76,7 @@ builds:
       - -w
       - -extldflags "-static"
     tags:
+      - musl
       - netgo
     goos:
       - linux
@@ -89,6 +93,7 @@ builds:
       - -w
       - -extldflags "-static"
     tags:
+      - musl
       - netgo
     goos:
       - linux
@@ -105,6 +110,7 @@ builds:
       - -w
       - -extldflags "-static"
     tags:
+      - musl
       - netgo
     goos:
       - linux
