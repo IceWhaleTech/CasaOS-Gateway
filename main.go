@@ -159,7 +159,34 @@ func run(
 				route := gatewayRoute.GetRoute()
 
 				if _state.GetGatewayPort() == "" {
-					if err := _state.SetGatewayPort("80"); err != nil {
+					// check if a port is availble starting from port 80/8080
+					portsToCheck := []int{}
+					for i := 80; i < 90; i++ {
+						portsToCheck = append(portsToCheck, i)
+					}
+
+					for i := 8080; i < 8090; i++ {
+						portsToCheck = append(portsToCheck, i)
+					}
+
+					port := ""
+					for _, p := range portsToCheck {
+						port = fmt.Sprintf("%d", p)
+						log.Printf("checking if port %s is available...", port)
+						if listener, err := net.Listen("tcp", net.JoinHostPort("", port)); err == nil {
+							if err = listener.Close(); err != nil {
+								log.Printf("failed to close listener: %s", err)
+								continue
+							}
+							break
+						}
+					}
+
+					if port == "" {
+						log.Fatalln("no port available for gateway to use")
+					}
+
+					if err := _state.SetGatewayPort(port); err != nil {
 						return err
 					}
 				}
