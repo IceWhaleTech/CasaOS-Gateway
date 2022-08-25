@@ -3,7 +3,7 @@ module github.com/IceWhaleTech/CasaOS-Gateway
 go 1.18
 
 require (
-	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220811222508-6c2a1d77be66
+	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825143858-d4c7ec24f342
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/assert/v2 v2.0.1
@@ -18,7 +18,7 @@ require (
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
 	github.com/golang/snappy v0.0.2 // indirect
-	github.com/klauspost/compress v1.11.4 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
 	github.com/mholt/archiver/v3 v3.5.1 // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect

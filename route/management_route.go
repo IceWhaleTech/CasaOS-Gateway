@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/IceWhaleTech/CasaOS-Common/middleware"
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/common_err"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
@@ -32,7 +33,8 @@ func (m *ManagementRoute) GetRoute() *gin.Engine {
 	}
 
 	r := gin.Default()
-
+	r.Use(middleware.Cors())
+	r.Use(middleware.WriteLog())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.GET("/ping", func(ctx *gin.Context) {
