@@ -1,10 +1,11 @@
 package route
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
+	"go.uber.org/zap"
 )
 
 type GatewayRoute struct {
@@ -23,7 +24,7 @@ func (g *GatewayRoute) GetRoute() *http.ServeMux {
 		if r.URL.Path == "/ping" {
 			w.WriteHeader(http.StatusOK)
 			if _, err := w.Write([]byte("pong from gateway service")); err != nil {
-				log.Println(err)
+				logger.Error("Failed to `pong` in resposne to `ping`", zap.Any("error", err))
 			}
 			return
 		}

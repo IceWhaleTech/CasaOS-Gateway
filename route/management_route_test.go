@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
+
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
@@ -22,6 +24,10 @@ var (
 	_router *gin.Engine
 	_state  *service.State
 )
+
+func init() {
+	logger.LogInitConsoleOnly()
+}
 
 func setup(t *testing.T) func(t *testing.T) {
 	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
