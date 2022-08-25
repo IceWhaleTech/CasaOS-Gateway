@@ -7,9 +7,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"gotest.tools/assert"
 )
+
+func init() {
+	logger.LogInitConsoleOnly()
+}
 
 func TestRoutesPersistence(t *testing.T) {
 	tmpdir1, _ := ioutil.TempDir("", "casaos-gateway-route-test")

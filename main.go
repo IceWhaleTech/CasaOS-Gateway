@@ -279,7 +279,11 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	go func() {
 		err := gatewayNew.Serve(listener)
 		if err != nil {
-			logger.Error("Error when starting new gateway", zap.Any("error", err), zap.Any("address", gatewayNew.Addr))
+			if errors.Is(err, http.ErrServerClosed) {
+				logger.Info("A gateway is stopped", zap.Any("address", gatewayNew.Addr))
+				return
+			}
+			logger.Error("Error when serving a gateway", zap.Any("error", err), zap.Any("address", gatewayNew.Addr))
 		}
 	}()
 
@@ -293,10 +297,14 @@ func reloadGateway(port string, route *http.ServeMux) error {
 
 	// stop old gateway
 	if _gateway != nil {
-		logger.Info("Stopping current gateway...", zap.Any("address", _gateway.Addr))
-		if err := _gateway.Shutdown(context.Background()); err != nil {
-			return err
-		}
+		gatewayOld := _gateway
+		go func() {
+			logger.Info("Stopping previous gateway in 1 seconds...", zap.Any("address", gatewayOld.Addr))
+			time.Sleep(time.Second) // so that any request to the old gateway gets a response
+			if err := gatewayOld.Shutdown(context.Background()); err != nil {
+				logger.Error("Error when stopping previous gateway", zap.Any("error", err), zap.Any("address", gatewayOld.Addr))
+			}
+		}()
 	}
 
 	_gateway = gatewayNew

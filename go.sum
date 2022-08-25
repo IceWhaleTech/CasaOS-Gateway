@@ -43,6 +43,8 @@ github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825143858-d4c7ec24f342 h1:nkiy
 github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825143858-d4c7ec24f342/go.mod h1:XGqdbedN9UlF3/rylcXKJ2BW4ayugBmEMa4Z0tk2KbQ=
 github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825171922-67041707ba07 h1:gHMWqOvX3W8sLqjUmwg/LG9GbB3TIcUciXjZQwOzpbU=
 github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825171922-67041707ba07/go.mod h1:XGqdbedN9UlF3/rylcXKJ2BW4ayugBmEMa4Z0tk2KbQ=
+github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825191226-4519f1880f68 h1:KMFS0/08mKgZqsM8fd5If/1NOLwtIvi7dljFEkJCdSw=
+github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825191226-4519f1880f68/go.mod h1:XGqdbedN9UlF3/rylcXKJ2BW4ayugBmEMa4Z0tk2KbQ=
 github.com/andybalholm/brotli v1.0.1 h1:KqhlKozYbRtJvsPrrEeXcO+N2l6NYT5A2QAFmSULpEc=
 github.com/andybalholm/brotli v1.0.1/go.mod h1:loMXtMfwqflxFJPmdbJO0a3KNoPuLBgiu3qAvBg8x/Y=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
