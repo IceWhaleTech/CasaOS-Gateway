@@ -114,6 +114,11 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 				})
 				return
 			}
+
+			ctx.JSON(http.StatusOK, model.Result{
+				Success: common_err.SUCCESS,
+				Message: common_err.GetMsg(common_err.SUCCESS),
+			})
 		})
 	}
 }
