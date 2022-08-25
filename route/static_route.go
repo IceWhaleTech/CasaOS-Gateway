@@ -1,9 +1,7 @@
 package route
 
 import (
-	"net/http"
 	"os"
-	"text/template"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-contrib/gzip"
@@ -32,19 +30,7 @@ func (s *StaticRoute) GetRoute() *gin.Engine {
 
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
-	r.Static("/ui", s.state.GetWWWPath())
-	r.GET("/", func(ctx *gin.Context) {
-		ctx.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-		index, err := template.ParseFiles(s.state.GetWWWPath() + "/index.html")
-		if err != nil {
-			ctx.Status(http.StatusNoContent)
-			return
-		}
-
-		if err := index.Execute(ctx.Writer, nil); err != nil {
-			ctx.Status(http.StatusInternalServerError)
-		}
-	})
+	r.Static("/", s.state.GetWWWPath())
 
 	return r
 }
