@@ -3,7 +3,7 @@ module github.com/IceWhaleTech/CasaOS-Gateway
 go 1.18
 
 require (
-	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825143858-d4c7ec24f342
+	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825171922-67041707ba07
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/assert/v2 v2.0.1
@@ -57,7 +57,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/dig v1.14.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.21.0 // indirect
+	go.uber.org/zap v1.21.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect

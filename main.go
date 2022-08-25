@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -15,10 +14,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
+
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 const localhost = "127.0.0.1"
@@ -44,19 +46,32 @@ func init() {
 		panic(err)
 	}
 
-	if err := _state.SetRuntimePath(config.GetString(common.ConfigKeyRuntimePath)); err != nil {
+	logger.LogInit(
+		config.GetString(common.ConfigKeyLogPath),
+		config.GetString(common.ConfigKeyLogSaveName),
+		config.GetString(common.ConfigKeyLogFileExt),
+	)
+
+	runtimePath := config.GetString(common.ConfigKeyRuntimePath)
+	if err := _state.SetRuntimePath(runtimePath); err != nil {
+		logger.Error("Failed to set runtime path", zap.Any("error", err), zap.Any(common.ConfigKeyRuntimePath, runtimePath))
 		panic(err)
 	}
 
-	if err := _state.SetGatewayPort(config.GetString(common.ConfigKeyGatewayPort)); err != nil {
+	gatewayPort := config.GetString(common.ConfigKeyGatewayPort)
+	if err := _state.SetGatewayPort(gatewayPort); err != nil {
+		logger.Error("Failed to set gateway port", zap.Any("error", err), zap.Any(common.ConfigKeyGatewayPort, gatewayPort))
 		panic(err)
 	}
 
-	if err := _state.SetWWWPath(config.GetString(common.ConfigKeyWWWPath)); err != nil {
+	wwwPath := config.GetString(common.ConfigKeyWWWPath)
+	if err := _state.SetWWWPath(wwwPath); err != nil {
+		logger.Error("Failed to set www path", zap.Any("error", err), zap.Any(common.ConfigKeyWWWPath, wwwPath))
 		panic(err)
 	}
 
 	if err := checkPrequisites(_state); err != nil {
+		logger.Error("Failed to check prequisites", zap.Any("error", err))
 		panic(err)
 	}
 
@@ -71,6 +86,7 @@ func init() {
 func main() {
 	pidFilename, err := writePidFile(_state.GetRuntimePath())
 	if err != nil {
+		logger.Error("Failed to write pid file to runtime path", zap.Any("error", err), zap.Any("runtimePath", _state.GetRuntimePath()))
 		panic(err)
 	}
 
@@ -82,7 +98,7 @@ func main() {
 	defer func() {
 		if _gateway != nil {
 			if err := _gateway.Shutdown(context.Background()); err != nil {
-				log.Println(err)
+				logger.Error("Failed to stop gateway", zap.Any("error", err))
 			}
 		}
 	}()
@@ -106,7 +122,7 @@ func main() {
 	)
 
 	if err := app.Start(ctx); err != nil {
-		log.Println(err)
+		logger.Error("Failed to start gateway", zap.Any("error", err))
 	}
 }
 
@@ -137,10 +153,14 @@ func run(
 				}
 
 				go func() {
-					log.Printf("management listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
+					logger.Info("Management service is listening...",
+						zap.Any("address", listener.Addr().String()),
+						zap.Any("filepath", urlFilePath),
+					)
 					err := managementServer.Serve(listener)
 					if err != nil {
-						log.Fatalln(err)
+						logger.Error("management server error", zap.Any("error", err))
+						os.Exit(1)
 					}
 				}()
 
@@ -172,10 +192,10 @@ func run(
 					port := ""
 					for _, p := range portsToCheck {
 						port = fmt.Sprintf("%d", p)
-						log.Printf("checking if port %s is available...", port)
+						logger.Info("Checking if port is available...", zap.Any("port", port))
 						if listener, err := net.Listen("tcp", net.JoinHostPort("", port)); err == nil {
 							if err = listener.Close(); err != nil {
-								log.Printf("failed to close listener: %s", err)
+								logger.Error("Failed to close listener", zap.Any("error", err), zap.Any("port", port))
 								continue
 							}
 							break
@@ -183,7 +203,7 @@ func run(
 					}
 
 					if port == "" {
-						log.Fatalln("no port available for gateway to use")
+						return errors.New("No port available for gateway to use")
 					}
 
 					if err := _state.SetGatewayPort(port); err != nil {
@@ -226,7 +246,11 @@ func run(
 				return err
 			}
 
-			log.Printf("static server listening on %s (saved to %s)", listener.Addr().String(), urlFilePath)
+			logger.Info(
+				"Static web service is listening...",
+				zap.Any("address", listener.Addr().String()),
+				zap.Any("filepath", urlFilePath),
+			)
 			return staticServer.Serve(listener)
 		},
 	})
@@ -241,7 +265,7 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	addr := listener.Addr().String()
 
 	if _gateway != nil && _gateway.Addr == addr {
-		log.Println("port is the same as current running gateway - no change is required")
+		logger.Info("Port is the same as current running gateway - no change is required")
 		return nil
 	}
 
@@ -255,7 +279,7 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	go func() {
 		err := gatewayNew.Serve(listener)
 		if err != nil {
-			log.Println(err)
+			logger.Error("Error when starting new gateway", zap.Any("error", err), zap.Any("address", gatewayNew.Addr))
 		}
 	}()
 
@@ -265,11 +289,11 @@ func reloadGateway(port string, route *http.ServeMux) error {
 		return err
 	}
 
-	log.Printf("gateway listening on %s", gatewayNew.Addr)
+	logger.Info("New gateway is listening...", zap.Any("address", gatewayNew.Addr))
 
 	// stop old gateway
 	if _gateway != nil {
-		log.Printf("stopping current gateway on %s", _gateway.Addr)
+		logger.Info("Stopping current gateway...", zap.Any("address", _gateway.Addr))
 		if err := _gateway.Shutdown(context.Background()); err != nil {
 			return err
 		}
@@ -325,7 +349,7 @@ func cleanupFiles(runtimePath string, filenames ...string) {
 	for _, filename := range filenames {
 		err := os.Remove(filepath.Join(runtimePath, filename))
 		if err != nil {
-			log.Println(err)
+			logger.Error("Failed to cleanup file", zap.Any("error", err), zap.Any("filename", filename))
 		}
 	}
 }

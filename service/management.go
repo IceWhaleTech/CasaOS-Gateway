@@ -3,14 +3,15 @@ package service
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
+	"go.uber.org/zap"
 )
 
 const RoutesFile = "routes.json"
@@ -27,7 +28,7 @@ func NewManagementService(state *State) *Management {
 	// try to load routes from routes.json
 	pathTargetMap, err := loadPathTargetMapFrom(routesFilepath)
 	if err != nil {
-		log.Println(err)
+		logger.Error("Failed to load routes", zap.Any("error", err), zap.Any("filepath", routesFilepath))
 		pathTargetMap = make(map[string]string)
 	}
 
@@ -36,7 +37,7 @@ func NewManagementService(state *State) *Management {
 	for path, target := range pathTargetMap {
 		targetURL, err := url.Parse(target)
 		if err != nil {
-			log.Println(err)
+			logger.Error("Failed to parse target", zap.Any("error", err), zap.String("target", target))
 			continue
 		}
 		pathReverseProxyMap[path] = httputil.NewSingleHostReverseProxy(targetURL)
