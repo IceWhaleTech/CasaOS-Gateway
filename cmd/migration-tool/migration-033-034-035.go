@@ -23,12 +23,12 @@ func (u *migrationTool) IsMigrationNeeded() (bool, error) {
 	}
 
 	// this is the best way to tell if CasaOS version is between 0.3.3 and 0.3.5
-	isUserDataInDatabase, err := version.IsUserDataInDatabase()
+	IsConfigKeyDBPathExist, err := version.IsConfigKeyDBPathExist()
 	if err != nil {
 		return false, err
 	}
 
-	if !isUserDataInDatabase {
+	if !IsConfigKeyDBPathExist {
 		return false, nil
 	}
 
