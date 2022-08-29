@@ -1,9 +1,9 @@
 module github.com/IceWhaleTech/CasaOS-Gateway
 
-go 1.18
+go 1.19
 
 require (
-	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220825191226-4519f1880f68
+	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220829003259-cf7e89c30d78
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/assert/v2 v2.0.1
