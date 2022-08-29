@@ -29,20 +29,19 @@ func (u *migrationTool) IsMigrationNeeded() (bool, error) {
 		return false, err
 	}
 
-	if majorVersion != 0 {
+	if majorVersion > 0 {
 		return false, nil
 	}
 
-	if minorVersion != 3 {
+	if minorVersion > 3 {
 		return false, nil
 	}
 
-	if patchVersion < 3 || patchVersion > 5 {
+	if minorVersion == 3 && patchVersion > 5 {
 		return false, nil
 	}
 
-	// legacy version has to be between 0.3.3 and 0.3.5
-	_logger.Info("Migration is needed for a CasaOS version between 0.3.3 and 0.3.5...")
+	_logger.Info("Migration is needed for a CasaOS version 0.3.5 and older...")
 	return true, nil
 }
 
