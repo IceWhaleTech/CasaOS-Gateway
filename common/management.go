@@ -54,7 +54,13 @@ func (m *managementService) ChangePort(request *ChangePortRequest) error {
 		return err
 	}
 
-	response, err := http.Post(url, "application/json", bytes.NewBuffer(body)) //nolint:gosec
+	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	response, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
