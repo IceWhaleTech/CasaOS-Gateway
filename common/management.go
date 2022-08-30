@@ -21,6 +21,7 @@ const (
 
 type ManagementService interface {
 	CreateRoute(route *Route) error
+	ChangePort(request *ChangePortRequest) error
 }
 
 type managementService struct {
