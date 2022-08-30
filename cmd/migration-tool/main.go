@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"fmt"
 	"os"
@@ -11,10 +12,13 @@ import (
 )
 
 const (
-	gatewayConfigSampleFilePath = "/etc/casaos/gateway.ini.sample"
-	gatewayConfigFilePath       = "/etc/casaos/gateway.ini"
-	gatewayServiceName          = "casaos-gateway.service"
+	gatewayConfigDirPath  = "/etc/casaos"
+	gatewayConfigFilePath = "/etc/casaos/gateway.ini"
+	gatewayServiceName    = "casaos-gateway.service"
 )
+
+//go:embedded ../../build/sysroot/etc/casaos/gateway.ini.sample
+var _gatewayINISample string
 
 var _logger *Logger
 

@@ -3,7 +3,7 @@ module github.com/IceWhaleTech/CasaOS-Gateway
 go 1.19
 
 require (
-	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220830215214-6889d9cc38a6
+	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220830232125-05c847f59030
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/assert/v2 v2.0.1

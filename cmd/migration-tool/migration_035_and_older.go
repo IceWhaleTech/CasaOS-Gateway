@@ -46,9 +46,26 @@ func (u *migrationTool) IsMigrationNeeded() (bool, error) {
 }
 
 func (u *migrationTool) PreMigrate() error {
-	_logger.Info("Copying %s to %s if it doesn't exist...", gatewayConfigSampleFilePath, gatewayConfigFilePath)
-	if err := file.CopySingleFile(gatewayConfigSampleFilePath, gatewayConfigFilePath, "skip"); err != nil {
-		return err
+	if _, err := os.Stat(gatewayConfigDirPath); os.IsNotExist(err) {
+		_logger.Info("Creating %s since it doesn't exists...", gatewayConfigDirPath)
+		if err := os.Mkdir(gatewayConfigDirPath, 0o755); err != nil {
+			return err
+		}
+	}
+
+	if _, err := os.Stat(gatewayConfigFilePath); os.IsNotExist(err) {
+		_logger.Info("Creating %s since it doesn't exist...", gatewayConfigFilePath)
+
+		f, err := os.Create(gatewayConfigFilePath)
+		if err != nil {
+			return err
+		}
+
+		defer f.Close()
+
+		if _, err := f.WriteString(_gatewayINISample); err != nil {
+			return err
+		}
 	}
 
 	extension := "." + time.Now().Format("20060102") + ".bak"
