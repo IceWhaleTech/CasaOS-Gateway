@@ -88,7 +88,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			ctx.Status(http.StatusCreated)
 		})
 
-		v1GatewayGroup.GET("/port", jwt.JWT(), func(ctx *gin.Context) {
+		v1GatewayGroup.GET("/port", jwt.ExceptLocalhost(), func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, model.Result{
 				Success: common_err.SUCCESS,
 				Message: common_err.GetMsg(common_err.SUCCESS),
@@ -96,7 +96,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			})
 		})
 
-		v1GatewayGroup.PUT("/port", jwt.JWT(), func(ctx *gin.Context) {
+		v1GatewayGroup.PUT("/port", jwt.ExceptLocalhost(), func(ctx *gin.Context) {
 			var request *common.ChangePortRequest
 
 			if err := ctx.ShouldBindJSON(&request); err != nil {
