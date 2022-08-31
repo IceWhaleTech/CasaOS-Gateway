@@ -20,6 +20,17 @@ __error() {
     exit 1
 }
 
+__normalize_version() {
+    local version
+    if [ "${1::1}" = "v" ]; then
+        version="${1:1}"
+    else
+        version="${1}"
+    fi
+
+    echo "$version"
+}
+
 __is_version_gt() {
     test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"
 }
@@ -28,8 +39,8 @@ __is_migration_needed() {
     local version1
     local version2
 
-    version1="${1}"
-    version2="${2}"
+    version1=$(__normalize_version "${1}")
+    version2=$(__normalize_version "${2}")
 
     if [ "${version1}" = "${version2}" ]; then
         return 1
