@@ -108,7 +108,7 @@ while read -r VERSION_PAIR; do
     # obtain "v0.3.6-alpha2" from "v0.3.5 v0.3.6-alpha2"
     VER2=$(echo "${VERSION_PAIR}" | cut -d' ' -f2)
 
-    if [ "v${CURRENT_VERSION}" = "${VER1// /}" ] || [ "${CURRENT_VERSION}" = "LEGACY_WITHOUT_VERSION" ]; then
+    if [ "${CURRENT_VERSION}" = "${VER1// /}" ] || [ "${CURRENT_VERSION}" = "LEGACY_WITHOUT_VERSION" ]; then
         CURRENT_VERSION_FOUND="true"
     fi
 
