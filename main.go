@@ -178,7 +178,7 @@ func run(
 				route := gatewayRoute.GetRoute()
 
 				if _state.GetGatewayPort() == "" {
-					// check if a port is availble starting from port 80/8080
+					// check if a port is available starting from port 80/8080
 					portsToCheck := []int{}
 					for i := 80; i < 90; i++ {
 						portsToCheck = append(portsToCheck, i)
