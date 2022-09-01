@@ -115,7 +115,8 @@ func (u *migrationTool) Migrate() error {
 }
 
 func (u *migrationTool) PostMigrate() error {
-	return _status.Done(common.Version)
+	defer _status.Done(common.Version)
+	return nil
 }
 
 func NewMigrationToolFor035AndOlder() interfaces.MigrationTool {
