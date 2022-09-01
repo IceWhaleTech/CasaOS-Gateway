@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -75,7 +75,7 @@ func (m *managementService) ChangePort(request *ChangePortRequest) error {
 func NewManagementService(RuntimePath string) (ManagementService, error) {
 	managementAddressFile := filepath.Join(RuntimePath, ManagementURLFilename)
 
-	buf, err := ioutil.ReadFile(managementAddressFile)
+	buf, err := os.ReadFile(managementAddressFile)
 	if err != nil {
 		return nil, err
 	}

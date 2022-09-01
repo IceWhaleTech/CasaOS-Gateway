@@ -3,7 +3,6 @@ package route
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -30,7 +29,7 @@ func init() {
 }
 
 func setup(t *testing.T) func(t *testing.T) {
-	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
+	tmpdir, _ := os.MkdirTemp("", "casaos-gateway-route-test")
 
 	_state = service.NewState()
 	if err := _state.SetRuntimePath(tmpdir); err != nil {
