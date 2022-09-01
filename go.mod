@@ -6,7 +6,6 @@ require (
 	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220901031227-02964ed12ab8
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
-	github.com/go-playground/assert/v2 v2.0.1
 	github.com/spf13/viper v1.12.0
 	go.uber.org/fx v1.17.1
 	gotest.tools v2.2.0+incompatible
