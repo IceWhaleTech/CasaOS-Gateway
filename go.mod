@@ -3,7 +3,7 @@ module github.com/IceWhaleTech/CasaOS-Gateway
 go 1.19
 
 require (
-	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220831042533-e51a41247ea2
+	github.com/IceWhaleTech/CasaOS-Common v0.0.0-20220901031227-02964ed12ab8
 	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/assert/v2 v2.0.1
@@ -67,4 +67,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gotest.tools/v3 v3.3.0
 )

@@ -16,7 +16,7 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/assert/v2"
+	"gotest.tools/v3/assert"
 )
 
 var (

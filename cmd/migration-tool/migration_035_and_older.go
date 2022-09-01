@@ -14,7 +14,18 @@ import (
 
 type migrationTool struct{}
 
+var _status *version.GlobalMigrationStatus
+
 func (u *migrationTool) IsMigrationNeeded() (bool, error) {
+	if status, err := version.GetGlobalMigrationStatus("gateway"); err == nil {
+		_status = status
+		if status.LastMigratedVersion != "" {
+			if r, err := version.Compare(status.LastMigratedVersion, common.Version); err == nil {
+				return r < 0, nil
+			}
+		}
+	}
+
 	if _, err := os.Stat(version.LegacyCasaOSConfigFilePath); err != nil {
 		_logger.Info("`%s` not found, migration is not needed.", version.LegacyCasaOSConfigFilePath)
 		return false, nil
@@ -103,7 +114,7 @@ func (u *migrationTool) Migrate() error {
 }
 
 func (u *migrationTool) PostMigrate() error {
-	return nil
+	return _status.Done(common.Version)
 }
 
 func NewMigrationToolFor035AndOlder() interfaces.MigrationTool {
