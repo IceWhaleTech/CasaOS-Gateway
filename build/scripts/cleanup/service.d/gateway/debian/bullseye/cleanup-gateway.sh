@@ -1,1 +1,0 @@
-../cleanup-gateway.sh

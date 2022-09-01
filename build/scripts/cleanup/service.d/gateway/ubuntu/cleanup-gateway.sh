@@ -1,1 +1,0 @@
-../debian/cleanup-gateway.sh
