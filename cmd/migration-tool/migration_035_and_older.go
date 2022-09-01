@@ -17,9 +17,10 @@ type migrationTool struct{}
 var _status *version.GlobalMigrationStatus
 
 func (u *migrationTool) IsMigrationNeeded() (bool, error) {
-	if status, err := version.GetGlobalMigrationStatus("gateway"); err == nil {
+	if status, err := version.GetGlobalMigrationStatus(gatewayServiceNameShort); err == nil {
 		_status = status
 		if status.LastMigratedVersion != "" {
+			_logger.Info("Last migrated version: %s", status.LastMigratedVersion)
 			if r, err := version.Compare(status.LastMigratedVersion, common.Version); err == nil {
 				return r < 0, nil
 			}
