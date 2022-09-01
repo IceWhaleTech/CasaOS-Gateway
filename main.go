@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -340,7 +339,7 @@ func checkURL(url string) error {
 func writePidFile(runtimePath string) (string, error) {
 	filename := "gateway.pid"
 	filepath := filepath.Join(runtimePath, filename)
-	return filename, ioutil.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0o600)
+	return filename, os.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0o600)
 }
 
 func writeAddressFile(runtimePath string, filename string, address string) (string, error) {
@@ -350,7 +349,7 @@ func writeAddressFile(runtimePath string, filename string, address string) (stri
 	}
 
 	filepath := filepath.Join(runtimePath, filename)
-	return filepath, ioutil.WriteFile(filepath, []byte(address), 0o600)
+	return filepath, os.WriteFile(filepath, []byte(address), 0o600)
 }
 
 func cleanupFiles(runtimePath string, filenames ...string) {

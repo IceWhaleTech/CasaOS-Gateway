@@ -3,7 +3,6 @@ package route
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,7 +16,7 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/assert/v2"
+	"gotest.tools/v3/assert"
 )
 
 var (
@@ -30,7 +29,7 @@ func init() {
 }
 
 func setup(t *testing.T) func(t *testing.T) {
-	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
+	tmpdir, _ := os.MkdirTemp("", "casaos-gateway-route-test")
 
 	_state = service.NewState()
 	if err := _state.SetRuntimePath(tmpdir); err != nil {

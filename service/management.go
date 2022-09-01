@@ -2,9 +2,9 @@ package service
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -120,7 +120,7 @@ func getSortedKeys[V any](m map[string]V) []string {
 }
 
 func loadPathTargetMapFrom(routesFilepath string) (map[string]string, error) {
-	content, err := ioutil.ReadFile(routesFilepath)
+	content, err := os.ReadFile(routesFilepath)
 	if err != nil {
 		return nil, err
 	}
@@ -140,5 +140,5 @@ func savePathTargetMapTo(routesFilepath string, pathTargetMap map[string]string)
 		return err
 	}
 
-	return ioutil.WriteFile(routesFilepath, content, 0o600)
+	return os.WriteFile(routesFilepath, content, 0o600)
 }

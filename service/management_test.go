@@ -1,7 +1,6 @@
 package service
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,8 +16,8 @@ func init() {
 }
 
 func TestRoutesPersistence(t *testing.T) {
-	tmpdir1, _ := ioutil.TempDir("", "casaos-gateway-route-test")
-	tmpdir2, _ := ioutil.TempDir("", "casaos-gateway-route-test")
+	tmpdir1, _ := os.MkdirTemp("", "casaos-gateway-route-test")
+	tmpdir2, _ := os.MkdirTemp("", "casaos-gateway-route-test")
 
 	defer func() {
 		os.RemoveAll(tmpdir1)
@@ -58,7 +57,7 @@ func TestRoutesPersistence(t *testing.T) {
 }
 
 func TestPathSorting(t *testing.T) {
-	tmpdir, _ := ioutil.TempDir("", "casaos-gateway-route-test")
+	tmpdir, _ := os.MkdirTemp("", "casaos-gateway-route-test")
 
 	defer func() {
 		os.RemoveAll(tmpdir)
