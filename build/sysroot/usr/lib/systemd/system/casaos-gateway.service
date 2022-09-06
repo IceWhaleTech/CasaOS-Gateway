@@ -4,9 +4,11 @@ ConditionFileNotEmpty=/etc/casaos/gateway.ini
 Description=CasaOS Gateway
 
 [Service]
+ExecStartPre=/usr/bin/casaos-gateway -v
 ExecStart=/usr/bin/casaos-gateway
 PIDFile=/var/run/casaos/gateway.pid
 Restart=always
+Type=notify
 
 [Install]
 WantedBy=multi-user.target

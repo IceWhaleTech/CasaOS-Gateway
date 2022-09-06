@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -74,6 +75,20 @@ func (m *managementService) ChangePort(request *ChangePortRequest) error {
 
 func NewManagementService(RuntimePath string) (ManagementService, error) {
 	managementAddressFile := filepath.Join(RuntimePath, ManagementURLFilename)
+
+	retry := 10
+
+	for retry > 0 {
+		if _, err := os.Stat(managementAddressFile); err == nil {
+			break
+		}
+
+		fmt.Printf("gateway management address file `%s` not found, retrying in 1 second...(%d)\n", managementAddressFile, retry)
+
+		time.Sleep(1 * time.Second)
+
+		retry--
+	}
 
 	buf, err := os.ReadFile(managementAddressFile)
 	if err != nil {

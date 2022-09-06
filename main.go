@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
+	"github.com/coreos/go-systemd/daemon"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
@@ -27,6 +28,9 @@ const localhost = "127.0.0.1"
 var (
 	_state   *service.State
 	_gateway *http.Server
+
+	_managementServiceReady = make(chan struct{})
+	_gatewayServiceReady    = make(chan struct{})
 )
 
 func init() {
@@ -111,6 +115,19 @@ func main() {
 		cancel()
 	}()
 
+	go func() {
+		<-_managementServiceReady
+		<-_gatewayServiceReady
+
+		if supported, err := daemon.SdNotify(false, daemon.SdNotifyReady); err != nil {
+			logger.Error("Failed to notify systemd that gateway is ready", zap.Any("error", err))
+		} else if supported {
+			logger.Info("Notified systemd that gateway is ready")
+		} else {
+			logger.Info("This process is not running as a systemd service.")
+		}
+	}()
+
 	app := fx.New(
 		fx.Provide(func() *service.State { return _state }),
 		fx.Provide(service.NewManagementService),
@@ -121,7 +138,9 @@ func main() {
 	)
 
 	if err := app.Start(ctx); err != nil {
-		logger.Error("Failed to start gateway", zap.Any("error", err))
+		if err != context.Canceled {
+			logger.Error("Failed to start gateway", zap.Any("error", err))
+		}
 	}
 }
 
@@ -163,10 +182,16 @@ func run(
 					}
 				}()
 
-				return management.CreateRoute(&common.Route{
+				if err := management.CreateRoute(&common.Route{
 					Path:   "/v1/gateway/port",
 					Target: "http://" + listener.Addr().String(),
-				})
+				}); err != nil {
+					return err
+				}
+
+				_managementServiceReady <- struct{}{}
+
+				return nil
 			},
 		},
 	)
@@ -214,7 +239,13 @@ func run(
 					return reloadGateway(port, route)
 				})
 
-				return reloadGateway(_state.GetGatewayPort(), route)
+				if err := reloadGateway(_state.GetGatewayPort(), route); err != nil {
+					return err
+				}
+
+				_gatewayServiceReady <- struct{}{}
+
+				return nil
 			},
 		})
 
