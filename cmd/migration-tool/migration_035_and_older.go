@@ -106,10 +106,6 @@ func (u *migrationTool) Migrate() error {
 		return err
 	}
 
-	if err := migrateServerSection(legacyConfigFile, newConfigFile); err != nil {
-		return err
-	}
-
 	_logger.Info("Saving new config ...")
 	return newConfigFile.WriteConfig()
 }
@@ -139,15 +135,6 @@ func migrateAppSection(legacyConfigFile *ini.File, newConfigFile *viper.Viper) e
 	if logFileExt, err := legacyConfigFile.Section("app").GetKey("LogFileExt"); err == nil {
 		_logger.Info("[app] LogFileExt = %s", logFileExt.Value())
 		newConfigFile.Set(common.ConfigKeyLogFileExt, logFileExt.Value())
-	}
-
-	return nil
-}
-
-func migrateServerSection(legacyConfigFile *ini.File, newConfigFile *viper.Viper) error {
-	if httpPort, err := legacyConfigFile.Section("server").GetKey("HttpPort"); err == nil {
-		_logger.Info("[server] HttpPort = %s", httpPort.Value())
-		newConfigFile.Set(common.ConfigKeyGatewayPort, httpPort.Value())
 	}
 
 	return nil
