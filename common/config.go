@@ -15,8 +15,6 @@ const (
 	ConfigKeyGatewayPort = "gateway.Port"
 	ConfigKeyWWWPath     = "gateway.WWWPath"
 	ConfigKeyRuntimePath = "common.RuntimePath"
-
-	DefaultGatewayPort = "80"
 )
 
 func LoadConfig() (*viper.Viper, error) {
@@ -26,7 +24,6 @@ func LoadConfig() (*viper.Viper, error) {
 	config.SetDefault(ConfigKeyLogSaveName, "gateway")
 	config.SetDefault(ConfigKeyLogFileExt, "log")
 
-	config.SetDefault(ConfigKeyGatewayPort, DefaultGatewayPort)
 	config.SetDefault(ConfigKeyWWWPath, "/var/lib/casaos/www")
 	config.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
