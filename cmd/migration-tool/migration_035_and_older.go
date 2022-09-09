@@ -35,21 +35,15 @@ func (u *migrationTool) IsMigrationNeeded() (bool, error) {
 	majorVersion, minorVersion, patchVersion, err := version.DetectLegacyVersion()
 	if err != nil {
 		if err == version.ErrLegacyVersionNotFound {
+			_logger.Info("Legacy version not found, migration is not needed.")
 			return false, nil
 		}
 
 		return false, err
 	}
 
-	if majorVersion > 0 {
-		return false, nil
-	}
-
-	if minorVersion > 3 {
-		return false, nil
-	}
-
-	if minorVersion == 3 && patchVersion > 5 {
+	if majorVersion > 0 || minorVersion > 3 || (minorVersion == 3 && patchVersion > 5) {
+		_logger.Info("Legacy version is v%d.%d.%d, migration is not needed.", majorVersion, minorVersion, patchVersion)
 		return false, nil
 	}
 
