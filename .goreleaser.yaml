@@ -3,8 +3,8 @@
 project_name: casaos-gateway
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
+    - go test -v ./...
 builds:
   - id: casaos-gateway-amd64
     binary: build/sysroot/usr/bin/casaos-gateway
