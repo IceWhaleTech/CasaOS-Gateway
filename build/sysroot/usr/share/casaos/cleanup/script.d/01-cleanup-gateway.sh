@@ -5,18 +5,18 @@ set -e
 readonly APP_NAME_SHORT=gateway
 
 __get_setup_script_directory_by_os_release() {
-	pushd "$(dirname "${BASH_SOURCE[0]}")/../service.d/${APP_NAME_SHORT}" >/dev/null
+	pushd "$(dirname "${BASH_SOURCE[0]}")/../service.d/${APP_NAME_SHORT}" &>/dev/null
 
 	{
 		# shellcheck source=/dev/null
 		{
 			source /etc/os-release
 			{
-				pushd "${ID}"/"${VERSION_CODENAME}" >/dev/null
+				pushd "${ID}"/"${VERSION_CODENAME}" &>/dev/null
 			} || {
-				pushd "${ID}" >/dev/null
+				pushd "${ID}" &>/dev/null
 			} || {
-				pushd "${ID_LIKE}" >/dev/null
+				pushd "${ID_LIKE}" &>/dev/null
 			} || {
 				echo "Unsupported OS: ${ID} ${VERSION_CODENAME} (${ID_LIKE})"
 				exit 1
@@ -24,7 +24,7 @@ __get_setup_script_directory_by_os_release() {
 
 			pwd
 
-			popd >/dev/null
+			popd &>/dev/null
 
 		} || {
 			echo "Unsupported OS: unknown"
@@ -33,7 +33,7 @@ __get_setup_script_directory_by_os_release() {
 
 	}
 
-	popd >/dev/null
+	popd &>/dev/null
 }
 
 SETUP_SCRIPT_DIRECTORY=$(__get_setup_script_directory_by_os_release)
