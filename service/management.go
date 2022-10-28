@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
-	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"go.uber.org/zap"
 )
 
@@ -50,7 +50,7 @@ func NewManagementService(state *State) *Management {
 	}
 }
 
-func (g *Management) CreateRoute(route *common.Route) error {
+func (g *Management) CreateRoute(route *model.Route) error {
 	url, err := url.Parse(route.Target)
 	if err != nil {
 		return err
@@ -69,11 +69,11 @@ func (g *Management) CreateRoute(route *common.Route) error {
 	return nil
 }
 
-func (g *Management) GetRoutes() []*common.Route {
-	routes := make([]*common.Route, 0)
+func (g *Management) GetRoutes() []*model.Route {
+	routes := make([]*model.Route, 0)
 
 	for path, target := range g.pathTargetMap {
-		routes = append(routes, &common.Route{
+		routes = append(routes, &model.Route{
 			Path:   path,
 			Target: target,
 		})

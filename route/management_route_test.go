@@ -13,7 +13,6 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
-	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
 	"gotest.tools/v3/assert"
@@ -62,7 +61,7 @@ func TestPing(t *testing.T) {
 func TestCreateRoute(t *testing.T) {
 	defer setup(t)(t)
 
-	route := &common.Route{
+	route := &model.Route{
 		Path:   "test",
 		Target: "http://localhost:8080",
 	}
@@ -82,7 +81,7 @@ func TestCreateRoute(t *testing.T) {
 	_router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var routes []*common.Route
+	var routes []*model.Route
 
 	decoder := json.NewDecoder(w.Body)
 
@@ -110,7 +109,7 @@ func TestChangePort(t *testing.T) {
 	expectedPort := "123"
 
 	// set
-	request := &common.ChangePortRequest{
+	request := &model.ChangePortRequest{
 		Port: expectedPort,
 	}
 
