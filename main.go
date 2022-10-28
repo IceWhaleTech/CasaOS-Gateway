@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/IceWhaleTech/CasaOS-Common/external"
+	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/coreos/go-systemd/daemon"
 
@@ -95,7 +97,7 @@ func main() {
 
 	defer cleanupFiles(
 		_state.GetRuntimePath(),
-		pidFilename, common.ManagementURLFilename, common.StaticURLFilename,
+		pidFilename, external.ManagementURLFilename, external.StaticURLFilename,
 	)
 
 	defer func() {
@@ -165,7 +167,7 @@ func run(
 					ReadHeaderTimeout: 5 * time.Second,
 				}
 
-				urlFilePath, err := writeAddressFile(_state.GetRuntimePath(), common.ManagementURLFilename, "http://"+listener.Addr().String())
+				urlFilePath, err := writeAddressFile(_state.GetRuntimePath(), external.ManagementURLFilename, "http://"+listener.Addr().String())
 				if err != nil {
 					return err
 				}
@@ -182,7 +184,7 @@ func run(
 					}
 				}()
 
-				if err := management.CreateRoute(&common.Route{
+				if err := management.CreateRoute(&model.Route{
 					Path:   "/v1/gateway/port",
 					Target: "http://" + listener.Addr().String(),
 				}); err != nil {
@@ -264,12 +266,12 @@ func run(
 
 			target := "http://" + listener.Addr().String()
 
-			urlFilePath, err := writeAddressFile(_state.GetRuntimePath(), common.StaticURLFilename, target)
+			urlFilePath, err := writeAddressFile(_state.GetRuntimePath(), external.StaticURLFilename, target)
 			if err != nil {
 				return err
 			}
 
-			if err := management.CreateRoute(&common.Route{
+			if err := management.CreateRoute(&model.Route{
 				Path:   "/",
 				Target: target,
 			}); err != nil {

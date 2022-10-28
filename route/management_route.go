@@ -8,7 +8,6 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/common_err"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
-	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -67,7 +66,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 		})
 
 		v1GatewayGroup.POST("/routes", func(ctx *gin.Context) {
-			var route *common.Route
+			var route *model.Route
 			err := ctx.ShouldBindJSON(&route)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, model.Result{
@@ -97,7 +96,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 		})
 
 		v1GatewayGroup.PUT("/port", jwt.ExceptLocalhost(), func(ctx *gin.Context) {
-			var request *common.ChangePortRequest
+			var request *model.ChangePortRequest
 
 			if err := ctx.ShouldBindJSON(&request); err != nil {
 				ctx.JSON(http.StatusBadRequest, model.Result{

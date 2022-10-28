@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
-	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"gotest.tools/assert"
 )
 
@@ -36,7 +36,7 @@ func TestRoutesPersistence(t *testing.T) {
 
 	management := NewManagementService(state1)
 
-	route := &common.Route{
+	route := &model.Route{
 		Path:   "/test",
 		Target: "http://localhost:8080",
 	}
@@ -78,7 +78,7 @@ func TestPathSorting(t *testing.T) {
 	}
 
 	for path, target := range routes {
-		if err := management.CreateRoute(&common.Route{
+		if err := management.CreateRoute(&model.Route{
 			Path:   path,
 			Target: target,
 		}); err != nil {
