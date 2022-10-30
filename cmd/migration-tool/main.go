@@ -23,6 +23,8 @@ const (
 
 var _logger *Logger
 
+// var _status *version.GlobalMigrationStatus
+
 func main() {
 	versionFlag := flag.Bool("v", false, "version")
 	debugFlag := flag.Bool("d", true, "debug")
