@@ -19,9 +19,11 @@ const (
 )
 
 //go:embedded ../../build/sysroot/etc/casaos/gateway.ini.sample
-var _gatewayINISample string
+//var _gatewayINISample string
 
 var _logger *Logger
+
+// var _status *version.GlobalMigrationStatus
 
 func main() {
 	versionFlag := flag.Bool("v", false, "version")
@@ -59,7 +61,7 @@ func main() {
 	}
 
 	migrationTools := []interfaces.MigrationTool{
-		NewMigrationToolFor035AndOlder(),
+		NewMigrationDummy(),
 	}
 
 	var selectedMigrationTool interfaces.MigrationTool
