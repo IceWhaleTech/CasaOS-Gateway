@@ -351,10 +351,13 @@ func checkURLWithRetry(url string, retry uint) error {
 	var err error
 
 	for count >= 0 {
+		logger.Info("Checking if service at URL is running...", zap.Any("url", url), zap.Any("retry", count))
 		if err = checkURL(url); err != nil {
 			time.Sleep(time.Second)
 			count--
+			continue
 		}
+		break
 	}
 
 	return err
