@@ -33,6 +33,8 @@ var (
 
 	_managementServiceReady = make(chan struct{})
 	_gatewayServiceReady    = make(chan struct{})
+
+	ErrCheckURLNotOK = errors.New("check url did not return 200 OK")
 )
 
 func init() {
@@ -321,7 +323,7 @@ func reloadGateway(port string, route *http.ServeMux) error {
 
 	// test if gateway is running
 	url := "http://" + addr + "/ping"
-	if err := checkURL(url); err != nil {
+	if err := checkURLWithRetry(url, 10); err != nil {
 		return err
 	}
 
@@ -344,26 +346,37 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	return nil
 }
 
-func checkURL(url string) error {
-	var response *http.Response
+func checkURLWithRetry(url string, retry uint) error {
+	count := retry
 	var err error
 
-	count := 10
-
 	for count >= 0 {
-		response, err = http.Get(url) //nolint:gosec
-
-		if err == nil && response.StatusCode == http.StatusOK {
-			break
+		if err = checkURL(url); err != nil {
+			time.Sleep(time.Second)
+			count--
 		}
-
-		time.Sleep(time.Second)
-
-		count--
 	}
 
-	if (response == nil) || (response.StatusCode != http.StatusOK) {
-		return errors.New("gateway not running")
+	return err
+}
+
+func checkURL(url string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+
+	response, err := http.DefaultClient.Do(request)
+	if err == nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		return ErrCheckURLNotOK
 	}
 
 	return nil
