@@ -15,6 +15,7 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/external"
 	"github.com/IceWhaleTech/CasaOS-Common/model"
+	http2 "github.com/IceWhaleTech/CasaOS-Common/utils/http"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/coreos/go-systemd/daemon"
 
@@ -364,15 +365,7 @@ func checkURLWithRetry(url string, retry uint) error {
 }
 
 func checkURL(url string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return err
-	}
-
-	response, err := http.DefaultClient.Do(request)
+	response, err := http2.Get(url, 5*time.Second)
 	if err == nil {
 		return err
 	}
