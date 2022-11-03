@@ -15,6 +15,7 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/external"
 	"github.com/IceWhaleTech/CasaOS-Common/model"
+	http2 "github.com/IceWhaleTech/CasaOS-Common/utils/http"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/coreos/go-systemd/daemon"
 
@@ -33,6 +34,8 @@ var (
 
 	_managementServiceReady = make(chan struct{})
 	_gatewayServiceReady    = make(chan struct{})
+
+	ErrCheckURLNotOK = errors.New("check url did not return 200 OK")
 )
 
 func init() {
@@ -321,7 +324,7 @@ func reloadGateway(port string, route *http.ServeMux) error {
 
 	// test if gateway is running
 	url := "http://" + addr + "/ping"
-	if err := checkURL(url); err != nil {
+	if err := checkURLWithRetry(url, 10); err != nil {
 		return err
 	}
 
@@ -344,26 +347,32 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	return nil
 }
 
-func checkURL(url string) error {
-	var response *http.Response
+func checkURLWithRetry(url string, retry uint) error {
+	count := retry
 	var err error
 
-	count := 10
-
 	for count >= 0 {
-		response, err = http.Get(url) //nolint:gosec
-
-		if err == nil && response.StatusCode == http.StatusOK {
-			break
+		logger.Info("Checking if service at URL is running...", zap.Any("url", url), zap.Any("retry", count))
+		if err = checkURL(url); err != nil {
+			time.Sleep(time.Second)
+			count--
+			continue
 		}
-
-		time.Sleep(time.Second)
-
-		count--
+		break
 	}
 
-	if (response == nil) || (response.StatusCode != http.StatusOK) {
-		return errors.New("gateway not running")
+	return err
+}
+
+func checkURL(url string) error {
+	response, err := http2.Get(url, 5*time.Second)
+	if err == nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		return ErrCheckURLNotOK
 	}
 
 	return nil
