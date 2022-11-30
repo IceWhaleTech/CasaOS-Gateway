@@ -10,7 +10,6 @@ builds:
   - id: casaos-gateway-amd64
     binary: build/sysroot/usr/bin/casaos-gateway
     env:
-      - CGO_ENABLED=1
       - CC=x86_64-linux-gnu-gcc
     ldflags:
       - -s
@@ -29,7 +28,6 @@ builds:
   - id: casaos-gateway-arm64
     binary: build/sysroot/usr/bin/casaos-gateway
     env:
-      - CGO_ENABLED=1
       - CC=aarch64-linux-gnu-gcc
     ldflags:
       - -s
@@ -38,6 +36,7 @@ builds:
     tags:
       - musl
       - netgo
+      - osusergo
     goos:
       - linux
     goarch:
@@ -48,7 +47,6 @@ builds:
   - id: casaos-gateway-arm-7
     binary: build/sysroot/usr/bin/casaos-gateway
     env:
-      - CGO_ENABLED=1
       - CC=arm-linux-gnueabihf-gcc
     ldflags:
       - -s
@@ -57,6 +55,7 @@ builds:
     tags:
       - musl
       - netgo
+      - osusergo
     goos:
       - linux
     goarch:
@@ -70,7 +69,6 @@ builds:
     binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
-      - CGO_ENABLED=1
       - CC=x86_64-linux-gnu-gcc
     ldflags:
       - -s
@@ -79,6 +77,7 @@ builds:
     tags:
       - musl
       - netgo
+      - osusergo
     goos:
       - linux
     goarch:
@@ -87,7 +86,6 @@ builds:
     binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
-      - CGO_ENABLED=1
       - CC=aarch64-linux-gnu-gcc
     ldflags:
       - -s
@@ -96,6 +94,7 @@ builds:
     tags:
       - musl
       - netgo
+      - osusergo
     goos:
       - linux
     goarch:
@@ -104,7 +103,6 @@ builds:
     binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
-      - CGO_ENABLED=1
       - CC=arm-linux-gnueabihf-gcc
     ldflags:
       - -s
@@ -113,6 +111,7 @@ builds:
     tags:
       - musl
       - netgo
+      - osusergo
     goos:
       - linux
     goarch:
