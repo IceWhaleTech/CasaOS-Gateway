@@ -55,7 +55,7 @@ Then register the API as follows:
   or in command line:
 
   ```bash
-  $ curl 'localhost:34703/v1/routes' --data-raw '
+  $ curl 'localhost:34703/v1/gateway/routes' --data-raw '
       {"path": "/ping", "target": "http://localhost:12345"}
     '
   ```
