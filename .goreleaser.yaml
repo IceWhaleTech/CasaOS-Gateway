@@ -9,6 +9,9 @@ before:
 builds:
   - id: casaos-gateway-amd64
     binary: build/sysroot/usr/bin/casaos-gateway
+    hooks:
+      post:
+        - upx --best --lzma -v --no-progress "{{ .Path }}"
     env:
       - CC=x86_64-linux-gnu-gcc
     ldflags:
@@ -24,12 +27,11 @@ builds:
       - linux
     goarch:
       - amd64
-    hooks:
-      post:
-        - upx --best --lzma -v --no-progress "{{ .Path }}"
-        - find build/sysroot -type f | xargs -L 1 realpath --relative-to=build/sysroot > build/sysroot.manifest
   - id: casaos-gateway-arm64
     binary: build/sysroot/usr/bin/casaos-gateway
+    hooks:
+      post:
+        - upx --best --lzma -v --no-progress "{{ .Path }}"
     env:
       - CC=aarch64-linux-gnu-gcc
     ldflags:
@@ -46,12 +48,11 @@ builds:
       - linux
     goarch:
       - arm64
+  - id: casaos-gateway-arm-7
+    binary: build/sysroot/usr/bin/casaos-gateway
     hooks:
       post:
         - upx --best --lzma -v --no-progress "{{ .Path }}"
-        - find build/sysroot -type f | xargs -L 1 realpath --relative-to=build/sysroot > build/sysroot.manifest
-  - id: casaos-gateway-arm-7
-    binary: build/sysroot/usr/bin/casaos-gateway
     env:
       - CC=arm-linux-gnueabihf-gcc
     ldflags:
@@ -70,12 +71,11 @@ builds:
       - arm
     goarm:
       - "7"
+  - id: casaos-gateway-migration-tool-amd64
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     hooks:
       post:
         - upx --best --lzma -v --no-progress "{{ .Path }}"
-        - find build/sysroot -type f | xargs -L 1 realpath --relative-to=build/sysroot > build/sysroot.manifest
-  - id: casaos-gateway-migration-tool-amd64
-    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
       - CC=x86_64-linux-gnu-gcc
@@ -93,11 +93,11 @@ builds:
       - linux
     goarch:
       - amd64
+  - id: casaos-gateway-migration-tool-arm64
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     hooks:
       post:
         - upx --best --lzma -v --no-progress "{{ .Path }}"
-  - id: casaos-gateway-migration-tool-arm64
-    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
       - CC=aarch64-linux-gnu-gcc
@@ -115,11 +115,11 @@ builds:
       - linux
     goarch:
       - arm64
+  - id: casaos-gateway-migration-tool-arm-7
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     hooks:
       post:
         - upx --best --lzma -v --no-progress "{{ .Path }}"
-  - id: casaos-gateway-migration-tool-arm-7
-    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     main: ./cmd/migration-tool
     env:
       - CC=arm-linux-gnueabihf-gcc
@@ -139,9 +139,6 @@ builds:
       - arm
     goarm:
       - "7"
-    hooks:
-      post:
-        - upx --best --lzma -v --no-progress "{{ .Path }}"
 archives:
   - name_template: "{{ .Os }}-{{ .Arch }}-{{ .ProjectName }}-v{{ .Version }}"
     id: casaos-gateway
