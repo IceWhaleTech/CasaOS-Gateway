@@ -21,7 +21,12 @@ const (
 //go:embedded ../../build/sysroot/etc/casaos/gateway.ini.sample
 //var _gatewayINISample string
 
-var _logger *Logger
+var (
+	commit = "private build"
+	date   = "private build"
+
+	_logger *Logger
+)
 
 // var _status *version.GlobalMigrationStatus
 
@@ -35,6 +40,9 @@ func main() {
 		fmt.Printf("v%s\n", common.Version)
 		os.Exit(0)
 	}
+
+	println("git commit:", commit)
+	println("build date:", date)
 
 	_logger = NewLogger()
 
