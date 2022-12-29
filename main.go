@@ -29,6 +29,9 @@ import (
 const localhost = "127.0.0.1"
 
 var (
+	commit = "private build"
+	date   = "private build"
+
 	_state   *service.State
 	_gateway *http.Server
 
@@ -46,6 +49,9 @@ func init() {
 		fmt.Printf("v%s\n", common.Version)
 		os.Exit(0)
 	}
+
+	println("git commit:", commit)
+	println("build date:", date)
 
 	_state = service.NewState()
 
