@@ -30,6 +30,14 @@ func (s *StaticRoute) GetRoute() *gin.Engine {
 
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
+	r.Use(func(ctx *gin.Context) {
+		if ctx.Request.URL.Path == "/" {
+			// disable caching for index.html (/) to fix blank page issue
+			ctx.Writer.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate,proxy-revalidate, max-age=0")
+		}
+		ctx.Next()
+	})
+
 	r.Static("/", s.state.GetWWWPath())
 
 	return r
