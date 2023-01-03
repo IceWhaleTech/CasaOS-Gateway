@@ -33,7 +33,6 @@ func (m *ManagementRoute) GetRoute() *gin.Engine {
 
 	r := gin.Default()
 	r.Use(middleware.Cors())
-	r.Use(middleware.WriteLog())
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.GET("/ping", func(ctx *gin.Context) {
