@@ -18,6 +18,8 @@ import (
 	http2 "github.com/IceWhaleTech/CasaOS-Common/utils/http"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/coreos/go-systemd/daemon"
+	"golang.ngrok.com/ngrok"
+	"golang.ngrok.com/ngrok/config"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
@@ -66,23 +68,20 @@ func init() {
 		config.GetString(common.ConfigKeyLogFileExt),
 	)
 
-	runtimePath := config.GetString(common.ConfigKeyRuntimePath)
-	if err := _state.SetRuntimePath(runtimePath); err != nil {
-		logger.Error("Failed to set runtime path", zap.Any("error", err), zap.Any(common.ConfigKeyRuntimePath, runtimePath))
-		panic(err)
-	}
-
 	gatewayPort := config.GetString(common.ConfigKeyGatewayPort)
 	if err := _state.SetGatewayPort(gatewayPort); err != nil {
 		logger.Error("Failed to set gateway port", zap.Any("error", err), zap.Any(common.ConfigKeyGatewayPort, gatewayPort))
 		panic(err)
 	}
 
+	runtimePath := config.GetString(common.ConfigKeyRuntimePath)
+	_state.SetRuntimePath(runtimePath)
+
 	wwwPath := config.GetString(common.ConfigKeyWWWPath)
-	if err := _state.SetWWWPath(wwwPath); err != nil {
-		logger.Error("Failed to set www path", zap.Any("error", err), zap.Any(common.ConfigKeyWWWPath, wwwPath))
-		panic(err)
-	}
+	_state.SetWWWPath(wwwPath)
+
+	ngrokToken := config.GetString(common.ConfigKeyNgrokToken)
+	_state.SetNgrokToken(ngrokToken)
 
 	if err := checkPrequisites(_state); err != nil {
 		logger.Error("Failed to check prequisites", zap.Any("error", err))
@@ -213,6 +212,7 @@ func run(
 			OnStart: func(ctx context.Context) error {
 				route := gatewayRoute.GetRoute()
 
+				// local gateway
 				if _state.GetGatewayPort() == "" {
 					// check if a port is available starting from port 80/8080
 					portsToCheck := []int{}
@@ -252,6 +252,23 @@ func run(
 
 				if err := reloadGateway(_state.GetGatewayPort(), route); err != nil {
 					return err
+				}
+
+				// ngrok gateway
+				ngrokToken := _state.GetNgrokToken()
+				if ngrokToken != "" {
+					logger.Info("ngrok token is set - trying to start ngrok gateway...")
+					tun, err := ngrok.Listen(ctx, config.HTTPEndpoint(), ngrok.WithAuthtoken(ngrokToken))
+					if err != nil {
+						logger.Error("Failed to start ngrok tunnel", zap.Any("error", err))
+					} else {
+						go func() {
+							if err := http.Serve(tun, route); err != nil {
+								logger.Info("serving ngrok tunnel has ended", zap.Any("error", err))
+							}
+						}()
+						println("ngrok tunnel is ready at", tun.URL())
+					}
 				}
 
 				_gatewayServiceReady <- struct{}{}

@@ -25,14 +25,10 @@ func TestRoutesPersistence(t *testing.T) {
 	}()
 
 	state1 := NewState()
-	if err := state1.SetRuntimePath(tmpdir1); err != nil {
-		t.Fatal(err)
-	}
+	state1.SetRuntimePath(tmpdir1)
 
 	state2 := NewState()
-	if err := state2.SetRuntimePath(tmpdir2); err != nil {
-		t.Fatal(err)
-	}
+	state2.SetRuntimePath(tmpdir2)
 
 	management := NewManagementService(state1)
 
@@ -64,9 +60,7 @@ func TestPathSorting(t *testing.T) {
 	}()
 
 	state := NewState()
-	if err := state.SetRuntimePath(tmpdir); err != nil {
-		t.Fatal(err)
-	}
+	state.SetRuntimePath(tmpdir)
 
 	management := NewManagementService(state)
 

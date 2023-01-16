@@ -15,6 +15,7 @@ const (
 	ConfigKeyGatewayPort = "gateway.Port"
 	ConfigKeyWWWPath     = "gateway.WWWPath"
 	ConfigKeyRuntimePath = "common.RuntimePath"
+	ConfigKeyNgrokToken  = "ngrok.Token" // nolint: gosec
 )
 
 func LoadConfig() (*viper.Viper, error) {

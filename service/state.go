@@ -6,6 +6,8 @@ type State struct {
 
 	runtimePath string
 	wwwPath     string
+
+	ngrokToken string
 }
 
 func NewState() *State {
@@ -41,20 +43,26 @@ func (c *State) notifiyOnGatewayPortChange() error {
 	return nil
 }
 
-func (c *State) SetRuntimePath(path string) error {
+func (c *State) SetRuntimePath(path string) {
 	c.runtimePath = path
-	return nil
 }
 
 func (c *State) GetRuntimePath() string {
 	return c.runtimePath
 }
 
-func (c *State) SetWWWPath(path string) error {
+func (c *State) SetWWWPath(path string) {
 	c.wwwPath = path
-	return nil
 }
 
 func (c *State) GetWWWPath() string {
 	return c.wwwPath
+}
+
+func (c *State) SetNgrokToken(token string) {
+	c.ngrokToken = token
+}
+
+func (c *State) GetNgrokToken() string {
+	return c.ngrokToken
 }

@@ -31,9 +31,7 @@ func setup(t *testing.T) func(t *testing.T) {
 	tmpdir, _ := os.MkdirTemp("", "casaos-gateway-route-test")
 
 	_state = service.NewState()
-	if err := _state.SetRuntimePath(tmpdir); err != nil {
-		t.Fatal(err)
-	}
+	_state.SetRuntimePath(tmpdir)
 
 	management := service.NewManagementService(_state)
 	managementRoute := NewManagementRoute(management)
