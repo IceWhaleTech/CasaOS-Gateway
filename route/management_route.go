@@ -1,9 +1,11 @@
 package route
 
 import (
+	"crypto/ecdsa"
 	"net/http"
 	"os"
 
+	"github.com/IceWhaleTech/CasaOS-Common/external"
 	"github.com/IceWhaleTech/CasaOS-Common/middleware"
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/common_err"
@@ -64,29 +66,31 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, m.management.GetRoutes())
 		})
 
-		v1GatewayGroup.POST("/routes", func(ctx *gin.Context) {
-			var route *model.Route
-			err := ctx.ShouldBindJSON(&route)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, model.Result{
-					Success: common_err.CLIENT_ERROR,
-					Message: err.Error(),
-				})
-				return
-			}
+		v1GatewayGroup.POST("/routes",
+			jwt.ExceptLocalhost(func() (*ecdsa.PublicKey, error) { return external.GetPublicKey(m.management.State.GetRuntimePath()) }),
+			func(ctx *gin.Context) {
+				var route *model.Route
+				err := ctx.ShouldBindJSON(&route)
+				if err != nil {
+					ctx.JSON(http.StatusBadRequest, model.Result{
+						Success: common_err.CLIENT_ERROR,
+						Message: err.Error(),
+					})
+					return
+				}
 
-			if err := m.management.CreateRoute(route); err != nil {
-				ctx.JSON(http.StatusInternalServerError, model.Result{
-					Success: common_err.SERVICE_ERROR,
-					Message: err.Error(),
-				})
-				return
-			}
+				if err := m.management.CreateRoute(route); err != nil {
+					ctx.JSON(http.StatusInternalServerError, model.Result{
+						Success: common_err.SERVICE_ERROR,
+						Message: err.Error(),
+					})
+					return
+				}
 
-			ctx.Status(http.StatusCreated)
-		})
+				ctx.Status(http.StatusCreated)
+			})
 
-		v1GatewayGroup.GET("/port", jwt.ExceptLocalhost(), func(ctx *gin.Context) {
+		v1GatewayGroup.GET("/port", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, model.Result{
 				Success: common_err.SUCCESS,
 				Message: common_err.GetMsg(common_err.SUCCESS),
@@ -94,29 +98,31 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *gin.RouterGroup) {
 			})
 		})
 
-		v1GatewayGroup.PUT("/port", jwt.ExceptLocalhost(), func(ctx *gin.Context) {
-			var request *model.ChangePortRequest
+		v1GatewayGroup.PUT("/port",
+			jwt.ExceptLocalhost(func() (*ecdsa.PublicKey, error) { return external.GetPublicKey(m.management.State.GetRuntimePath()) }),
+			func(ctx *gin.Context) {
+				var request *model.ChangePortRequest
 
-			if err := ctx.ShouldBindJSON(&request); err != nil {
-				ctx.JSON(http.StatusBadRequest, model.Result{
-					Success: common_err.CLIENT_ERROR,
-					Message: err.Error(),
+				if err := ctx.ShouldBindJSON(&request); err != nil {
+					ctx.JSON(http.StatusBadRequest, model.Result{
+						Success: common_err.CLIENT_ERROR,
+						Message: err.Error(),
+					})
+					return
+				}
+
+				if err := m.management.SetGatewayPort(request.Port); err != nil {
+					ctx.JSON(http.StatusInternalServerError, model.Result{
+						Success: common_err.SERVICE_ERROR,
+						Message: err.Error(),
+					})
+					return
+				}
+
+				ctx.JSON(http.StatusOK, model.Result{
+					Success: common_err.SUCCESS,
+					Message: common_err.GetMsg(common_err.SUCCESS),
 				})
-				return
-			}
-
-			if err := m.management.SetGatewayPort(request.Port); err != nil {
-				ctx.JSON(http.StatusInternalServerError, model.Result{
-					Success: common_err.SERVICE_ERROR,
-					Message: err.Error(),
-				})
-				return
-			}
-
-			ctx.JSON(http.StatusOK, model.Result{
-				Success: common_err.SUCCESS,
-				Message: common_err.GetMsg(common_err.SUCCESS),
 			})
-		})
 	}
 }

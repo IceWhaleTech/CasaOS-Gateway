@@ -19,7 +19,8 @@ const RoutesFile = "routes.json"
 type Management struct {
 	pathTargetMap       map[string]string
 	pathReverseProxyMap map[string]*httputil.ReverseProxy
-	state               *State
+
+	State *State
 }
 
 func NewManagementService(state *State) *Management {
@@ -46,7 +47,7 @@ func NewManagementService(state *State) *Management {
 	return &Management{
 		pathTargetMap:       pathTargetMap,
 		pathReverseProxyMap: pathReverseProxyMap,
-		state:               state,
+		State:               state,
 	}
 }
 
@@ -59,7 +60,7 @@ func (g *Management) CreateRoute(route *model.Route) error {
 	g.pathTargetMap[route.Path] = route.Target
 	g.pathReverseProxyMap[route.Path] = httputil.NewSingleHostReverseProxy(url)
 
-	routesFilePath := filepath.Join(g.state.GetRuntimePath(), RoutesFile)
+	routesFilePath := filepath.Join(g.State.GetRuntimePath(), RoutesFile)
 
 	err = savePathTargetMapTo(routesFilePath, g.pathTargetMap)
 	if err != nil {
@@ -96,11 +97,11 @@ func (g *Management) GetProxy(path string) *httputil.ReverseProxy {
 }
 
 func (g *Management) GetGatewayPort() string {
-	return g.state.GetGatewayPort()
+	return g.State.GetGatewayPort()
 }
 
 func (g *Management) SetGatewayPort(port string) error {
-	if err := g.state.SetGatewayPort(port); err != nil {
+	if err := g.State.SetGatewayPort(port); err != nil {
 		return err
 	}
 

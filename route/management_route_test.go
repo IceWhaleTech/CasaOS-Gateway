@@ -7,12 +7,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
-	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/gin-gonic/gin"
 	"gotest.tools/v3/assert"
@@ -67,11 +65,11 @@ func TestCreateRoute(t *testing.T) {
 	}
 
 	body, err := json.Marshal(route)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 
 	req, _ := http.NewRequest(http.MethodPost, "/v1/gateway/routes", bytes.NewReader(body))
+	req.RemoteAddr = "127.0.0.1:0"
+
 	w := httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusCreated, w.Code)
@@ -86,11 +84,7 @@ func TestCreateRoute(t *testing.T) {
 	decoder := json.NewDecoder(w.Body)
 
 	err = decoder.Decode(&routes)
-
-	if err != nil {
-		t.Error(err)
-	}
-
+	assert.NilError(t, err)
 	assert.Equal(t, 1, len(routes))
 	assert.Equal(t, route.Path, routes[0].Path)
 	assert.Equal(t, route.Target, routes[0].Target)
@@ -114,17 +108,10 @@ func TestChangePort(t *testing.T) {
 	}
 
 	body, err := json.Marshal(request)
-	if err != nil {
-		t.Error(err)
-	}
-
-	token, err := jwt.GenerateToken("test", "test", 0, "casaos", 10*time.Second)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 
 	req, _ := http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
-	req.Header.Set("Authorization", token)
+	req.RemoteAddr = "127.0.0.1:0"
 
 	w := httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
@@ -134,7 +121,6 @@ func TestChangePort(t *testing.T) {
 
 	// get
 	req, _ = http.NewRequest(http.MethodGet, "/v1/gateway/port", nil)
-	req.Header.Set("Authorization", token)
 
 	w = httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
@@ -145,9 +131,6 @@ func TestChangePort(t *testing.T) {
 	decoder := json.NewDecoder(w.Body)
 
 	err = decoder.Decode(&result)
-	if err != nil {
-		t.Error(err)
-	}
-
+	assert.NilError(t, err)
 	assert.Equal(t, expectedPort, result.Data)
 }
