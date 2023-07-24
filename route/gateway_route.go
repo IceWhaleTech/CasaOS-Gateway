@@ -32,6 +32,12 @@ func rewriteRequestSourceIP(r *http.Request) {
 
 	ipList := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
 
+	// when r.Header.Get("X-Forwarded-For") is "". to clean the ipList.
+	// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
+	if len(ipList) == 1 && ipList[0] == "" {
+		ipList = []string{}
+	}
+
 	r.Header.Del("X-Forwarded-For")
 	r.Header.Del("X-Real-IP")
 
