@@ -30,7 +30,13 @@ func rewriteRequestSourceIP(r *http.Request) {
 	// `X-Forwarded-For:[::1,::1]`(normal or hacked) attacker can build the request to bypass the verification.
 	// But in the case. the remoteAddress should be the real ip. So we can use remoteAddress to verify it.
 
-	ipList := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+	ipList := []string{}
+
+	// when r.Header.Get("X-Forwarded-For") is "". the ipList should be empty.
+	// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
+	if r.Header.Get("X-Forwarded-For") != "" {
+		ipList = strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+	}
 
 	// when r.Header.Get("X-Forwarded-For") is "". to clean the ipList.
 	// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
