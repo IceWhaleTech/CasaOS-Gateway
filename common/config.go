@@ -25,12 +25,12 @@ const (
 func LoadConfig() (*viper.Viper, error) {
 	config := viper.New()
 
-	config.SetDefault(ConfigKeyLogPath, "/var/log/casaos")
+	config.SetDefault(ConfigKeyLogPath, constants.DefaultLogPath)
 	config.SetDefault(ConfigKeyLogSaveName, "gateway")
 	config.SetDefault(ConfigKeyLogFileExt, "log")
 
-	config.SetDefault(ConfigKeyWWWPath, "/var/lib/casaos/www")
-	config.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+	config.SetDefault(ConfigKeyWWWPath, filepath.Join(constants.DefaultDataPath, "www"))
+	config.SetDefault(ConfigKeyRuntimePath, constants.DefaultRuntimePath) // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	config.SetConfigName(GatewayConfigName)
 	config.SetConfigType(GatewayConfigType)
