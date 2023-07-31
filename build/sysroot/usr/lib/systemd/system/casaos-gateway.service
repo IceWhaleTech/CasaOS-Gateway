@@ -1,6 +1,5 @@
 [Unit]
 After=network.target
-ConditionFileNotEmpty=/etc/casaos/gateway.ini
 Description=CasaOS Gateway
 
 [Service]

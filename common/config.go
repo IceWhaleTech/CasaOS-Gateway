@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/viper"
+
+	"github.com/IceWhaleTech/CasaOS-Common/utils/constants"
 )
 
 const (
@@ -15,6 +17,9 @@ const (
 	ConfigKeyGatewayPort = "gateway.Port"
 	ConfigKeyWWWPath     = "gateway.WWWPath"
 	ConfigKeyRuntimePath = "common.RuntimePath"
+
+	GatewayConfigName = "gateway"
+	GatewayConfigType = "ini"
 )
 
 func LoadConfig() (*viper.Viper, error) {
@@ -41,7 +46,7 @@ func LoadConfig() (*viper.Viper, error) {
 		config.AddConfigPath(configPath)
 	}
 
-	config.AddConfigPath(filepath.Join("/", "etc", "casaos"))
+	config.AddConfigPath(constants.DefaultConfigPath)
 
 	if err := config.ReadInConfig(); err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/external"
 	"github.com/IceWhaleTech/CasaOS-Common/model"
+	"github.com/IceWhaleTech/CasaOS-Common/utils/constants"
 	http2 "github.com/IceWhaleTech/CasaOS-Common/utils/http"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/coreos/go-systemd/daemon"
@@ -39,6 +41,9 @@ var (
 	_gatewayServiceReady    = make(chan struct{})
 
 	ErrCheckURLNotOK = errors.New("check url did not return 200 OK")
+
+	//go:embed build/sysroot/etc/casaos/gateway.ini.sample
+	_confSample string
 )
 
 func init() {
@@ -54,6 +59,24 @@ func init() {
 	println("build date:", date)
 
 	_state = service.NewState()
+
+	// create default config file if not exist
+	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayConfigName+"."+common.GatewayConfigType)
+	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
+		fmt.Println("config file not exist, create it")
+		// create config file
+		file, err := os.Create(ConfigFilePath)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+
+		// write default config
+		_, err = file.WriteString(_confSample)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	config, err := common.LoadConfig()
 	if err != nil {
