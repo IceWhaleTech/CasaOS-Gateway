@@ -61,7 +61,7 @@ func init() {
 	_state = service.NewState()
 
 	// create default config file if not exist
-	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayConfigName+"."+common.GatewayConfigType)
+	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
 	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
 		fmt.Println("config file not exist, create it")
 		// create config file

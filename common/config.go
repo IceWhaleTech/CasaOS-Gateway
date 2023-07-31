@@ -18,7 +18,7 @@ const (
 	ConfigKeyWWWPath     = "gateway.WWWPath"
 	ConfigKeyRuntimePath = "common.RuntimePath"
 
-	GatewayConfigName = "gateway"
+	GatewayName       = "gateway"
 	GatewayConfigType = "ini"
 )
 
@@ -26,13 +26,13 @@ func LoadConfig() (*viper.Viper, error) {
 	config := viper.New()
 
 	config.SetDefault(ConfigKeyLogPath, constants.DefaultLogPath)
-	config.SetDefault(ConfigKeyLogSaveName, "gateway")
+	config.SetDefault(ConfigKeyLogSaveName, GatewayName)
 	config.SetDefault(ConfigKeyLogFileExt, "log")
 
 	config.SetDefault(ConfigKeyWWWPath, filepath.Join(constants.DefaultDataPath, "www"))
 	config.SetDefault(ConfigKeyRuntimePath, constants.DefaultRuntimePath) // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
-	config.SetConfigName(GatewayConfigName)
+	config.SetConfigName(GatewayName)
 	config.SetConfigType(GatewayConfigType)
 
 	if currentDirectory, err := os.Getwd(); err != nil {
