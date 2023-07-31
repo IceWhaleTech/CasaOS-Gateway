@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/viper"
+
+	"github.com/IceWhaleTech/CasaOS-Common/utils/constants"
 )
 
 const (
@@ -15,20 +17,23 @@ const (
 	ConfigKeyGatewayPort = "gateway.Port"
 	ConfigKeyWWWPath     = "gateway.WWWPath"
 	ConfigKeyRuntimePath = "common.RuntimePath"
+
+	GatewayName       = "gateway"
+	GatewayConfigType = "ini"
 )
 
 func LoadConfig() (*viper.Viper, error) {
 	config := viper.New()
 
-	config.SetDefault(ConfigKeyLogPath, "/var/log/casaos")
-	config.SetDefault(ConfigKeyLogSaveName, "gateway")
+	config.SetDefault(ConfigKeyLogPath, constants.DefaultLogPath)
+	config.SetDefault(ConfigKeyLogSaveName, GatewayName)
 	config.SetDefault(ConfigKeyLogFileExt, "log")
 
-	config.SetDefault(ConfigKeyWWWPath, "/var/lib/casaos/www")
-	config.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
+	config.SetDefault(ConfigKeyWWWPath, filepath.Join(constants.DefaultDataPath, "www"))
+	config.SetDefault(ConfigKeyRuntimePath, constants.DefaultRuntimePath) // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
-	config.SetConfigName("gateway")
-	config.SetConfigType("ini")
+	config.SetConfigName(GatewayName)
+	config.SetConfigType(GatewayConfigType)
 
 	if currentDirectory, err := os.Getwd(); err != nil {
 		log.Println(err)
@@ -41,7 +46,7 @@ func LoadConfig() (*viper.Viper, error) {
 		config.AddConfigPath(configPath)
 	}
 
-	config.AddConfigPath(filepath.Join("/", "etc", "casaos"))
+	config.AddConfigPath(constants.DefaultConfigPath)
 
 	if err := config.ReadInConfig(); err != nil {
 		return nil, err
