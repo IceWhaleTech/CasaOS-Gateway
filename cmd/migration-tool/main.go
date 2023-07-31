@@ -12,8 +12,6 @@ import (
 )
 
 const (
-	gatewayConfigDirPath    = "/etc/casaos"
-	gatewayConfigFilePath   = "/etc/casaos/gateway.ini"
 	gatewayServiceName      = "casaos-gateway.service"
 	gatewayServiceNameShort = "gateway"
 )
