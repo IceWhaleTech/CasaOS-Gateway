@@ -32,8 +32,8 @@ func LoadConfig() (*viper.Viper, error) {
 	config.SetDefault(ConfigKeyWWWPath, "/var/lib/casaos/www")
 	config.SetDefault(ConfigKeyRuntimePath, "/var/run/casaos") // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
-	config.SetConfigName("gateway")
-	config.SetConfigType("ini")
+	config.SetConfigName(GatewayConfigName)
+	config.SetConfigType(GatewayConfigType)
 
 	if currentDirectory, err := os.Getwd(); err != nil {
 		log.Println(err)
