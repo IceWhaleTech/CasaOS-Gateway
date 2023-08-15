@@ -1,0 +1,15 @@
+[Unit]
+After=network.target
+After=casaos-installer.service
+Requires=casaos-installer.service
+Description=CasaOS Gateway
+
+[Service]
+ExecStartPre=/usr/bin/casaos-gateway -v
+ExecStart=/usr/bin/casaos-gateway
+PIDFile=/var/run/casaos/gateway.pid
+Restart=always
+Type=notify
+
+[Install]
+WantedBy=multi-user.target
