@@ -15,7 +15,6 @@ const (
 	ConfigKeyLogSaveName = "gateway.LogSaveName"
 	ConfigKeyLogFileExt  = "gateway.LogFileExt"
 	ConfigKeyGatewayPort = "gateway.Port"
-	ConfigKeyWWWPath     = "gateway.WWWPath"
 	ConfigKeyRuntimePath = "common.RuntimePath"
 
 	GatewayName       = "gateway"
@@ -29,7 +28,6 @@ func LoadConfig() (*viper.Viper, error) {
 	config.SetDefault(ConfigKeyLogSaveName, GatewayName)
 	config.SetDefault(ConfigKeyLogFileExt, "log")
 
-	config.SetDefault(ConfigKeyWWWPath, filepath.Join(constants.DefaultDataPath, "www"))
 	config.SetDefault(ConfigKeyRuntimePath, constants.DefaultRuntimePath) // See https://refspecs.linuxfoundation.org/FHS_3.0/fhs/ch05s13.html
 
 	config.SetConfigName(GatewayName)
