@@ -48,6 +48,7 @@ var (
 
 func init() {
 	versionFlag := flag.Bool("v", false, "version")
+	wwwPathFlag := flag.String("w", filepath.Join(constants.DefaultDataPath, "www"), "www path")
 	flag.Parse()
 
 	if *versionFlag {
@@ -101,9 +102,8 @@ func init() {
 		panic(err)
 	}
 
-	wwwPath := config.GetString(common.ConfigKeyWWWPath)
-	if err := _state.SetWWWPath(wwwPath); err != nil {
-		logger.Error("Failed to set www path", zap.Any("error", err), zap.Any(common.ConfigKeyWWWPath, wwwPath))
+	if err := _state.SetWWWPath(*wwwPathFlag); err != nil {
+		logger.Error("Failed to set www path", zap.Any("error", err), zap.String("wwwpath", *wwwPathFlag))
 		panic(err)
 	}
 
