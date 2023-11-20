@@ -31,9 +31,9 @@ builds:
       - amd64
   - id: casaos-gateway-arm64
     binary: build/sysroot/usr/bin/casaos-gateway
-    hooks:
-      post:
-        - upx --best --lzma -v --no-progress "{{ .Path }}"
+    # hooks:
+    #   post:
+    #     - upx --best --lzma -v --no-progress "{{ .Path }}"
     env:
       - CC=aarch64-linux-gnu-gcc
     ldflags:
