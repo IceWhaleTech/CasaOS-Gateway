@@ -1,6 +1,5 @@
 [Unit]
 After=network.target
-After=casaos-installer.service
 Description=CasaOS Gateway
 
 [Service]
