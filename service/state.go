@@ -20,20 +20,21 @@ func NewState() *State {
 
 func (c *State) SetGatewayPort(port string) error {
 	c.gatewayPort = port
-	return c.notifiyOnGatewayPortChange()
+	return c.notifyOnGatewayPortChange()
 }
 
 func (c *State) GetGatewayPort() string {
 	return c.gatewayPort
 }
 
+// Add func `f` to the stack. The stack of funcs will be called, in reverse order, when there is request to change the port.
 func (c *State) OnGatewayPortChange(f func(string) error) {
 	c.onGatewayPortChange = append(c.onGatewayPortChange, f)
 }
 
-func (c *State) notifiyOnGatewayPortChange() error {
-	for _, f := range c.onGatewayPortChange {
-		if err := f(c.gatewayPort); err != nil {
+func (c *State) notifyOnGatewayPortChange() error {
+	for i := len(c.onGatewayPortChange) - 1; i >= 0; i-- {
+		if err := c.onGatewayPortChange[i](c.gatewayPort); err != nil {
 			return err
 		}
 	}
