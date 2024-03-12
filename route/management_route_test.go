@@ -3,6 +3,7 @@ package route
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -129,6 +130,78 @@ func TestChangePort(t *testing.T) {
 
 	var result *model.Result
 	decoder := json.NewDecoder(w.Body)
+
+	err = decoder.Decode(&result)
+	assert.NilError(t, err)
+	assert.Equal(t, expectedPort, result.Data)
+}
+
+func TestChangePortNegative(t *testing.T) {
+	defer setup(t)(t)
+
+	expectedPort := "123"
+
+	// set
+	request := &model.ChangePortRequest{
+		Port: expectedPort,
+	}
+
+	body, err := json.Marshal(request)
+	assert.NilError(t, err)
+
+	req, _ := http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
+	req.RemoteAddr = "127.0.0.1:0"
+
+	w := httptest.NewRecorder()
+	_router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, expectedPort, "123")
+
+	// get
+	req, _ = http.NewRequest(http.MethodGet, "/v1/gateway/port", nil)
+
+	w = httptest.NewRecorder()
+	_router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var result *model.Result
+	decoder := json.NewDecoder(w.Body)
+
+	err = decoder.Decode(&result)
+	assert.NilError(t, err)
+	assert.Equal(t, expectedPort, result.Data)
+
+	// emulate error
+	_state.OnGatewayPortChange(func(_ string) error {
+		return errors.New("error")
+	})
+
+	// set
+	request.Port = "456"
+
+	body, err = json.Marshal(request)
+	assert.NilError(t, err)
+
+	req, _ = http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
+	req.RemoteAddr = "127.0.0.1:0"
+
+	w = httptest.NewRecorder()
+	_router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, expectedPort, "123")
+
+	// get
+	req, _ = http.NewRequest(http.MethodGet, "/v1/gateway/port", nil)
+
+	w = httptest.NewRecorder()
+	_router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	decoder = json.NewDecoder(w.Body)
 
 	err = decoder.Decode(&result)
 	assert.NilError(t, err)

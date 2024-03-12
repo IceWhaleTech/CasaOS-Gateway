@@ -112,10 +112,8 @@ func init() {
 		panic(err)
 	}
 
-	_state.OnGatewayPortChange(func(s string) error {
-		config.Set(common.ConfigKeyGatewayPort, _state.GetGatewayPort())
-		config.Set(common.ConfigKeyRuntimePath, _state.GetRuntimePath())
-
+	_state.OnGatewayPortChange(func(port string) error {
+		config.Set(common.ConfigKeyGatewayPort, port)
 		return config.WriteConfig()
 	})
 }
