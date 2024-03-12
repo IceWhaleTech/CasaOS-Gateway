@@ -18,9 +18,13 @@ func NewState() *State {
 	}
 }
 
-func (c *State) SetGatewayPort(port string) error {
-	c.gatewayPort = port
-	return c.notifyOnGatewayPortChange()
+func (c *State) SetGatewayPort(port string) (err error) {
+	defer func() {
+		if err == nil {
+			c.gatewayPort = port
+		}
+	}()
+	return c.notifyOnGatewayPortChange(port)
 }
 
 func (c *State) GetGatewayPort() string {
@@ -32,9 +36,9 @@ func (c *State) OnGatewayPortChange(f func(string) error) {
 	c.onGatewayPortChange = append(c.onGatewayPortChange, f)
 }
 
-func (c *State) notifyOnGatewayPortChange() error {
+func (c *State) notifyOnGatewayPortChange(port string) error {
 	for i := len(c.onGatewayPortChange) - 1; i >= 0; i-- {
-		if err := c.onGatewayPortChange[i](c.gatewayPort); err != nil {
+		if err := c.onGatewayPortChange[i](port); err != nil {
 			return err
 		}
 	}
