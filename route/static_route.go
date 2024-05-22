@@ -12,6 +12,8 @@ type StaticRoute struct {
 	state *service.State
 }
 
+var RouteCache = make(map[string]string)
+
 func NewStaticRoute(state *service.State) *StaticRoute {
 	return &StaticRoute{
 		state: state,
@@ -31,9 +33,9 @@ func (s *StaticRoute) GetRoute() *gin.Engine {
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.Use(func(ctx *gin.Context) {
-		if ctx.Request.URL.Path == "/" {
-			// disable caching for index.html (/) to fix blank page issue
+		if _, ok := RouteCache[ctx.Request.URL.Path]; !ok {
 			ctx.Writer.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate,proxy-revalidate, max-age=0")
+			RouteCache[ctx.Request.URL.Path] = ctx.Request.URL.Path
 		}
 		ctx.Next()
 	})
