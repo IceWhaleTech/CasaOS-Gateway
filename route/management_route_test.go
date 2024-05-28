@@ -13,12 +13,11 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
-	"github.com/gin-gonic/gin"
 	"gotest.tools/v3/assert"
 )
 
 var (
-	_router *gin.Engine
+	_router http.Handler
 	_state  *service.State
 )
 
