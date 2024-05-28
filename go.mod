@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/IceWhaleTech/CasaOS-Common v0.4.8-alpha9
-	github.com/gin-gonic/gin v1.9.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/spf13/viper v1.18.2
 	go.uber.org/fx v1.20.1
@@ -17,6 +16,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
+	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
