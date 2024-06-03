@@ -39,3 +39,4 @@ func (s *StaticRoute) GetRoute() http.Handler {
 
 	return e
 }
+
