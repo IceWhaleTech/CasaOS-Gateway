@@ -31,6 +31,7 @@ func setupGatewayConfig(t *testing.T) func() {
 	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
 	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
 		// create config file
+		os.MkdirAll(constants.DefaultConfigPath, os.ModePerm)
 		file, err := os.Create(ConfigFilePath)
 		if err != nil {
 			panic(err)
@@ -58,6 +59,7 @@ func setupIncorrectGatewayConfig(t *testing.T) {
 	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
 	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
 		// create config file
+		os.MkdirAll(constants.DefaultConfigPath, os.ModePerm)
 		file, err := os.Create(ConfigFilePath)
 		if err != nil {
 			panic(err)
