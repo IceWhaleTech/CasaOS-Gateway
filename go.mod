@@ -6,6 +6,7 @@ require (
 	github.com/IceWhaleTech/CasaOS-Common v0.4.8-alpha9
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/spf13/viper v1.18.2
+	github.com/stretchr/testify v1.8.4
 	go.uber.org/fx v1.20.1
 	gotest.tools v2.2.0+incompatible
 )
@@ -15,6 +16,7 @@ require (
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/gin-gonic/gin v1.9.1 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
@@ -22,6 +24,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
