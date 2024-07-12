@@ -17,7 +17,13 @@ runtimepath=/var/run/casaos
 [gateway]
 port=80`
 
-func setupGatewayConfig(t *testing.T) {
+const _incorrectConfSample = `[common]
+runtimepath=/var/run/casaos
+
+[gateway]
+port=80`
+
+func setupGatewayConfig(t *testing.T) func() {
 	// the setup should only run in CICD environment
 
 	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
@@ -33,11 +39,47 @@ func setupGatewayConfig(t *testing.T) {
 		_, err = file.WriteString(_confSample)
 		assert.NoError(t, err)
 	}
+	return func() {
+		// remove config file
+		err := os.Remove(ConfigFilePath)
+		assert.NoError(t, err)
+	}
+}
+
+func setupIncorrectGatewayConfig(t *testing.T) {
+	// the setup should only run in CICD environment
+
+	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
+	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
+		// create config file
+		file, err := os.Create(ConfigFilePath)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+
+		// write default config
+		_, err = file.WriteString(_incorrectConfSample)
+		assert.NoError(t, err)
+	}
 }
 
 func TestGetPort(t *testing.T) {
-	setupGatewayConfig(t)
+	defer setupGatewayConfig(t)()
 	port, err := pkg.GetGatewayPort()
 	assert.NoError(t, err)
-	assert.Equal(t, "80", port)
+	assert.Equal(t, 80, port)
+}
+
+func TestGetBlankPort(t *testing.T) {
+	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
+	// only run in CICD environment
+	if _, err := os.Stat(ConfigFilePath); !os.IsNotExist(err) {
+		t.Skip("the test only run in CICD environment to avoid overwrite the config file")
+	}
+
+	setupIncorrectGatewayConfig(t)
+	port, err := pkg.GetGatewayPort()
+	assert.NotNil(t, err)
+	assert.Equal(t, 0, port)
 }
