@@ -26,6 +26,8 @@ port=80`
 func setupGatewayConfig(t *testing.T) func() {
 	// the setup should only run in CICD environment
 
+	testInCICD := false
+
 	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
 	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
 		// create config file
@@ -38,11 +40,15 @@ func setupGatewayConfig(t *testing.T) func() {
 		// write default config
 		_, err = file.WriteString(_confSample)
 		assert.NoError(t, err)
+		testInCICD = true
 	}
+
 	return func() {
-		// remove config file
-		err := os.Remove(ConfigFilePath)
-		assert.NoError(t, err)
+		if testInCICD {
+			// remove config file
+			err := os.Remove(ConfigFilePath)
+			assert.NoError(t, err)
+		}
 	}
 }
 
