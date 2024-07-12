@@ -10,15 +10,15 @@ import (
 	"testing"
 
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
+	"github.com/labstack/echo/v4"
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
-	"github.com/gin-gonic/gin"
 	"gotest.tools/v3/assert"
 )
 
 var (
-	_router *gin.Engine
+	_router http.Handler
 	_state  *service.State
 )
 
@@ -70,6 +70,7 @@ func TestCreateRoute(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodPost, "/v1/gateway/routes", bytes.NewReader(body))
 	req.RemoteAddr = "127.0.0.1:0"
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	w := httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
@@ -113,6 +114,7 @@ func TestChangePort(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
 	req.RemoteAddr = "127.0.0.1:0"
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	w := httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
@@ -151,6 +153,7 @@ func TestChangePortNegative(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
 	req.RemoteAddr = "127.0.0.1:0"
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	w := httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
@@ -160,6 +163,7 @@ func TestChangePortNegative(t *testing.T) {
 
 	// get
 	req, _ = http.NewRequest(http.MethodGet, "/v1/gateway/port", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	w = httptest.NewRecorder()
 	_router.ServeHTTP(w, req)
@@ -186,6 +190,7 @@ func TestChangePortNegative(t *testing.T) {
 
 	req, _ = http.NewRequest(http.MethodPut, "/v1/gateway/port", bytes.NewReader(body))
 	req.RemoteAddr = "127.0.0.1:0"
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	w = httptest.NewRecorder()
 	_router.ServeHTTP(w, req)

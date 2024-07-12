@@ -1,16 +1,18 @@
 package route
 
 import (
-	"os"
+	"net/http"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
+	echo_middleware "github.com/labstack/echo/v4/middleware"
 )
 
 type StaticRoute struct {
 	state *service.State
 }
+
+var RouteCache = make(map[string]string)
 
 func NewStaticRoute(state *service.State) *StaticRoute {
 	return &StaticRoute{
@@ -18,27 +20,23 @@ func NewStaticRoute(state *service.State) *StaticRoute {
 	}
 }
 
-func (s *StaticRoute) GetRoute() *gin.Engine {
-	// check if environment variable is set
-	if ginMode, success := os.LookupEnv("GIN_MODE"); success {
-		gin.SetMode(ginMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
+func (s *StaticRoute) GetRoute() http.Handler {
+	e := echo.New()
 
-	r := gin.Default()
+	e.Use(echo_middleware.Gzip())
 
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
-
-	r.Use(func(ctx *gin.Context) {
-		if ctx.Request.URL.Path == "/" {
-			// disable caching for index.html (/) to fix blank page issue
-			ctx.Writer.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate,proxy-revalidate, max-age=0")
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			if _, ok := RouteCache[ctx.Request().URL.Path]; !ok {
+				ctx.Response().Writer.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate,proxy-revalidate, max-age=0")
+				RouteCache[ctx.Request().URL.Path] = ctx.Request().URL.Path
+			}
+			return next(ctx)
 		}
-		ctx.Next()
 	})
 
-	r.Static("/", s.state.GetWWWPath())
+	e.Static("/", s.state.GetWWWPath())
 
-	return r
+	return e
 }
+
