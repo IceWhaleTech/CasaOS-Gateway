@@ -21,7 +21,7 @@ const _incorrectConfSample = `[common]
 runtimepath=/var/run/casaos
 
 [gateway]
-port=80`
+port=`
 
 func setupGatewayConfig(t *testing.T) func() {
 	// the setup should only run in CICD environment
