@@ -2,6 +2,9 @@ package route
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/labstack/echo/v4"
@@ -11,6 +14,8 @@ import (
 type StaticRoute struct {
 	state *service.State
 }
+
+var startTime = time.Now()
 
 var RouteCache = make(map[string]string)
 
@@ -35,8 +40,18 @@ func (s *StaticRoute) GetRoute() http.Handler {
 		}
 	})
 
+	// serve /index.html to sovle 304 cache problem by 'If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT' from web browser
+	e.GET("/", func(ctx echo.Context) error {
+		f, err := os.Open(filepath.Join(s.state.GetWWWPath(), "index.html"))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		http.ServeContent(ctx.Response(), ctx.Request(), "index.html", startTime, f)
+		return nil
+	})
+
 	e.Static("/", s.state.GetWWWPath())
 
 	return e
 }
-
