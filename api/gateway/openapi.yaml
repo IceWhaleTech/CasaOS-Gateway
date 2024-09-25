@@ -1,0 +1,116 @@
+openapi: 3.0.3
+
+info:
+  title: CasaOS Gateway API
+  version: v1
+  description: |-
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/IceWhaleTech/logo/main/casaos/casaos_banner_dark_night_800px.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/IceWhaleTech/logo/main/casaos/casaos_banner_twilight_blue_800px.png">
+        <img alt="CasaOS" src="https://raw.githubusercontent.com/IceWhaleTech/logo/main/casaos/casaos_banner_twilight_blue_800px.png">
+    </picture>
+
+servers:
+  - url: /v1/gateway
+
+tags:
+  - name: USB methods
+    description: |-
+      USB methods
+
+security:
+  - access_token: []
+
+paths:
+  /port:
+    put:
+      summary: Set gateway port
+      description: |-
+        Set gateway port
+      operationId: setGatewayPort
+      tags:
+        - Gateway methods
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                port:
+                  type: integer
+                  description: Gateway port
+                  example: 80
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseOK"
+    get:
+      summary: Get gateway port
+      description: |-
+        Get gateway port
+      operationId: getGatewayPort
+      tags:
+        - Gateway methods
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseStringOK"
+        "400":
+          $ref: "#/components/responses/ResponseBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
+
+components:
+  securitySchemes:
+    access_token:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  responses:
+    ResponseOK:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BaseResponse"
+    ResponseStringOK:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SuccessResponseString"
+    ResponseBadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            readOnly: true
+            allOf:
+              - $ref: "#/components/schemas/BaseResponse"
+          example:
+            message: "Bad Request"
+    ResponseInternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            readOnly: true
+            allOf:
+              - $ref: "#/components/schemas/BaseResponse"
+          example:
+            message: "Internal Server Error"
+  schemas:
+    BaseResponse:
+      properties:
+        message:
+          readOnly: true
+          description: message returned by server side if there is any
+          type: string
+          example: ""
+
+    SuccessResponseString:
+      allOf:
+        - $ref: "#/components/schemas/BaseResponse"
+        - properties:
+            data:
+              type: string
+              description: When the interface returns success, this field is the specific success information
