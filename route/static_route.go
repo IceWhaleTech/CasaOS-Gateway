@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
@@ -95,10 +96,20 @@ func (c *CustomFileInfo) ModTime() time.Time {
 	return startTime
 }
 
+var indexRE = regexp.MustCompile(`/modules/[^\/]*/($|(index\.(html?|aspx?|cgi|do|jsp))|((default|index|home)\.php))`)
+
 func (s *StaticRoute) GetRoute() http.Handler {
 	e := echo.New()
 
 	e.Use(echo_middleware.Gzip())
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			if indexRE.MatchString(ctx.Request().URL.Path) {
+				ctx.Response().Writer.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate,proxy-revalidate, max-age=0")
+			}
+			return next(ctx)
+		}
+	})
 
 	// sovle 304 cache problem by 'If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT' from web browser
 	e.StaticFS("/", NewCustomFS(s.state.GetWWWPath()))
