@@ -96,7 +96,7 @@ func (c *CustomFileInfo) ModTime() time.Time {
 	return startTime
 }
 
-var indexRE = regexp.MustCompile(`/($|/modules/[^\/]*/($|(index\.(html?|aspx?|cgi|do|jsp))|((default|index|home)\.php)))`)
+var indexRE = regexp.MustCompile(`/($|modules/[^\/]*/($|(index\.(html?|aspx?|cgi|do|jsp))|((default|index|home)\.php)))`)
 
 func (s *StaticRoute) GetRoute() http.Handler {
 	e := echo.New()
