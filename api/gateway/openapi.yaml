@@ -37,9 +37,9 @@ paths:
               type: object
               properties:
                 port:
-                  type: integer
+                  type: string
                   description: Gateway port
-                  example: 80
+                  example: "80"
       responses:
         "200":
           $ref: "#/components/responses/ResponseOK"
