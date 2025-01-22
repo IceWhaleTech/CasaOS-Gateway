@@ -8,7 +8,7 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Common/model"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func init() {
