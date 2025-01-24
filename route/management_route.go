@@ -10,8 +10,9 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Common/utils/common_err"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/jwt"
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
+	echo_jwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
-	echo_middleware "github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type ManagementRoute struct {
@@ -27,7 +28,7 @@ func NewManagementRoute(management *service.Management) *ManagementRoute {
 func (m *ManagementRoute) GetRoute() *echo.Echo {
 	e := echo.New()
 
-	e.Use((echo_middleware.CORSWithConfig(echo_middleware.CORSConfig{
+	e.Use((middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{echo.POST, echo.GET, echo.OPTIONS, echo.PUT, echo.DELETE},
 		AllowHeaders:     []string{echo.HeaderAuthorization, echo.HeaderContentLength, echo.HeaderXCSRFToken, echo.HeaderContentType, echo.HeaderAccessControlAllowOrigin, echo.HeaderAccessControlAllowHeaders, echo.HeaderAccessControlAllowMethods, echo.HeaderConnection, echo.HeaderOrigin, echo.HeaderXRequestedWith},
@@ -36,7 +37,7 @@ func (m *ManagementRoute) GetRoute() *echo.Echo {
 		AllowCredentials: true,
 	})))
 
-	e.Use(echo_middleware.Gzip())
+	e.Use(middleware.Gzip())
 
 	e.GET("/ping", func(ctx echo.Context) error {
 		return ctx.JSON(http.StatusOK, echo.Map{
@@ -87,12 +88,12 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *echo.Group) {
 
 				return ctx.NoContent(http.StatusCreated)
 			},
-			echo_middleware.JWTWithConfig(echo_middleware.JWTConfig{
+			echo_jwt.WithConfig(echo_jwt.Config{
 				Skipper: func(c echo.Context) bool {
 					return c.RealIP() == "::1" || c.RealIP() == "127.0.0.1"
 					// return true
 				},
-				ParseTokenFunc: func(token string, c echo.Context) (interface{}, error) {
+				ParseTokenFunc: func(c echo.Context, token string) (interface{}, error) {
 					valid, claims, err := jwt.Validate(token, func() (*ecdsa.PublicKey, error) { return external.GetPublicKey(m.management.State.GetRuntimePath()) })
 					if err != nil || !valid {
 						return nil, echo.ErrUnauthorized
@@ -101,7 +102,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *echo.Group) {
 
 					return claims, nil
 				},
-				TokenLookupFuncs: []echo_middleware.ValuesExtractor{
+				TokenLookupFuncs: []middleware.ValuesExtractor{
 					func(c echo.Context) ([]string, error) {
 						if len(c.Request().Header.Get(echo.HeaderAuthorization)) > 0 {
 							return []string{c.Request().Header.Get(echo.HeaderAuthorization)}, nil
@@ -142,12 +143,12 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *echo.Group) {
 					Message: common_err.GetMsg(common_err.SUCCESS),
 				})
 			},
-			echo_middleware.JWTWithConfig(echo_middleware.JWTConfig{
+			echo_jwt.WithConfig(echo_jwt.Config{
 				Skipper: func(c echo.Context) bool {
 					return c.RealIP() == "::1" || c.RealIP() == "127.0.0.1"
 					// return true
 				},
-				ParseTokenFunc: func(token string, c echo.Context) (interface{}, error) {
+				ParseTokenFunc: func(c echo.Context, token string) (interface{}, error) {
 					valid, claims, err := jwt.Validate(token, func() (*ecdsa.PublicKey, error) { return external.GetPublicKey(m.management.State.GetRuntimePath()) })
 					if err != nil || !valid {
 						return nil, echo.ErrUnauthorized
@@ -156,7 +157,7 @@ func (m *ManagementRoute) buildV1RouteGroup(v1Group *echo.Group) {
 
 					return claims, nil
 				},
-				TokenLookupFuncs: []echo_middleware.ValuesExtractor{
+				TokenLookupFuncs: []middleware.ValuesExtractor{
 					func(c echo.Context) ([]string, error) {
 						if len(c.Request().Header.Get(echo.HeaderAuthorization)) > 0 {
 							return []string{c.Request().Header.Get(echo.HeaderAuthorization)}, nil

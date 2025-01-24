@@ -10,7 +10,7 @@ import (
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"github.com/labstack/echo/v4"
-	echo_middleware "github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type StaticRoute struct {
@@ -100,7 +100,7 @@ var indexRE = regexp.MustCompile(`/($|modules/[^\/]*/($|(index\.(html?|aspx?|cgi
 func (s *StaticRoute) GetRoute() *echo.Echo {
 	e := echo.New()
 
-	e.Use(echo_middleware.Gzip())
+	e.Use(middleware.Gzip())
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			if indexRE.MatchString(ctx.Request().URL.Path) {

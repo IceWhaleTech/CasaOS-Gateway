@@ -315,6 +315,8 @@ github.com/kr/pty v1.1.8/go.mod h1:O1sed60cT9XZ5uDucP5qwvh+TE3NnUj51EiZO/lmSfw=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
+github.com/labstack/echo-jwt v0.0.0-20221127215225-c84d41a71003 h1:FyalHKl9hnJvhNbrABJXXjC2hG7gvIF0ioW9i0xHNQU=
+github.com/labstack/echo-jwt v0.0.0-20221127215225-c84d41a71003/go.mod h1:ovRFgyKvi73jQIFCWz9ByQwzhIyohkzY0MFAlPGyr8Q=
 github.com/labstack/echo-jwt/v4 v4.2.0 h1:odSISV9JgcSCuhgQSV/6Io3i7nUmfM/QkBeR5GVJj5c=
 github.com/labstack/echo-jwt/v4 v4.2.0/go.mod h1:MA2RqdXdEn4/uEglx0HcUOgQSyBaTh5JcaHIan3biwU=
 github.com/labstack/echo/v4 v4.12.0 h1:IKpw49IMryVB2p1a4dzwlhP1O2Tf2E0Ir/450lH+kI0=
@@ -377,8 +379,6 @@ github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6
 github.com/pelletier/go-toml/v2 v2.1.0/go.mod h1:tJU2Z3ZkXwnxa4DPO899bsyIoywizdUvyaeZurnPPDc=
 github.com/peterbourgon/diskv/v3 v3.0.1 h1:x06SQA46+PKIUftmEujdwSEpIx8kR+M9eLYsUxeYveU=
 github.com/peterbourgon/diskv/v3 v3.0.1/go.mod h1:kJ5Ny7vLdARGU3WUuy6uzO6T0nb/2gWcT1JiBvRmb5o=
-github.com/pires/go-proxyproto v0.7.1-0.20240628150027-b718e7ce4964 h1:ct/vxNBgHpASQ4sT8NaBX9LtsEtluZqaUJydLG50U3E=
-github.com/pires/go-proxyproto v0.7.1-0.20240628150027-b718e7ce4964/go.mod h1:iknsfgnH8EkjrMeMyvfKByp9TiBZCKZM0jx2xmKqnVY=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

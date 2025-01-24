@@ -1,14 +1,14 @@
 module github.com/IceWhaleTech/CasaOS-Gateway
 
-go 1.22.3
-
-toolchain go1.23.0
+go 1.23
 
 require (
 	github.com/IceWhaleTech/CasaOS-Common v0.4.11-alpha6
 	github.com/caddyserver/caddy/v2 v2.9.1
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
+	github.com/labstack/echo-jwt v0.0.0-20221127215225-c84d41a71003
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/samber/lo v1.38.1
 	github.com/spf13/viper v1.18.2
 	go.uber.org/fx v1.20.1
 	go.uber.org/zap v1.27.0
@@ -87,7 +87,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/onsi/ginkgo/v2 v2.13.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
-	github.com/pires/go-proxyproto v0.7.1-0.20240628150027-b718e7ce4964 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.19.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
@@ -99,7 +98,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
-	github.com/samber/lo v1.38.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/slackhq/nebula v1.6.1 // indirect

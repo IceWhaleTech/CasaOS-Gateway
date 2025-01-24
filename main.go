@@ -327,7 +327,7 @@ func reloadGateway(port string, route *echo.Echo) error {
 
 	addr := listener.Addr().String()
 
-	if _gateway != nil && _gateway.Server.Addr == addr {
+	if _gateway != nil && _gateway.Addr == addr {
 		logger.Info("Port is the same as current running gateway - no change is required")
 		return nil
 	}
