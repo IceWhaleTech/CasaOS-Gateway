@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"net/http"
 	"os"
 	"regexp"
 	"time"
@@ -98,7 +97,7 @@ func (c *CustomFileInfo) ModTime() time.Time {
 
 var indexRE = regexp.MustCompile(`/($|modules/[^\/]*/($|(index\.(html?|aspx?|cgi|do|jsp))|((default|index|home)\.php)))`)
 
-func (s *StaticRoute) GetRoute() http.Handler {
+func (s *StaticRoute) GetRoute() *echo.Echo {
 	e := echo.New()
 
 	e.Use(echo_middleware.Gzip())

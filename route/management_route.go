@@ -24,7 +24,7 @@ func NewManagementRoute(management *service.Management) *ManagementRoute {
 	}
 }
 
-func (m *ManagementRoute) GetRoute() http.Handler {
+func (m *ManagementRoute) GetRoute() *echo.Echo {
 	e := echo.New()
 
 	e.Use((echo_middleware.CORSWithConfig(echo_middleware.CORSConfig{

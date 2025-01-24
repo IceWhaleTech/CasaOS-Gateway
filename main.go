@@ -20,6 +20,7 @@ import (
 	http2 "github.com/IceWhaleTech/CasaOS-Common/utils/http"
 	"github.com/IceWhaleTech/CasaOS-Common/utils/logger"
 	"github.com/coreos/go-systemd/daemon"
+	"github.com/labstack/echo/v4"
 
 	"github.com/IceWhaleTech/CasaOS-Gateway/common"
 	"github.com/IceWhaleTech/CasaOS-Gateway/route"
@@ -259,7 +260,7 @@ func run(
 					}
 
 					if port == "" {
-						return errors.New("No port available for gateway to use")
+						return errors.New("no port available for gateway to use")
 					}
 
 					if err := _state.SetGatewayPort(port); err != nil {
@@ -318,7 +319,7 @@ func run(
 	})
 }
 
-func reloadGateway(port string, route *http.ServeMux) error {
+func reloadGateway(port string, route *echo.Echo) error {
 	listener, err := net.Listen("tcp", net.JoinHostPort("", port))
 	if err != nil {
 		return err
@@ -326,7 +327,7 @@ func reloadGateway(port string, route *http.ServeMux) error {
 
 	addr := listener.Addr().String()
 
-	if _gateway != nil && _gateway.Addr == addr {
+	if _gateway != nil && _gateway.Server.Addr == addr {
 		logger.Info("Port is the same as current running gateway - no change is required")
 		return nil
 	}
@@ -339,6 +340,8 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	}
 
 	go func() {
+		// route.AutoTLSManager.TLSConfig().ServerName = "localhost"
+		// err := route.StartAutoTLS(":443")
 		err := gatewayNew.Serve(listener)
 		if err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
@@ -378,7 +381,7 @@ func checkURLWithRetry(url string, retry uint) error {
 	count := retry
 	var err error
 
-	for count >= 0 {
+	for count > 0 {
 		logger.Info("Checking if service at URL is running...", zap.Any("url", url), zap.Any("retry", count))
 		if err = checkURL(url); err != nil {
 			time.Sleep(time.Second)
