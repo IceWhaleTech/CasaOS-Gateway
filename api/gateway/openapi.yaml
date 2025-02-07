@@ -18,6 +18,14 @@ tags:
     description: |-
       USB methods
 
+  - name: Security methods
+    description: |-
+      Security methods
+
+  - name: Gateway methods
+    description: |-
+      Gateway methods
+
 security:
   - access_token: []
 
@@ -53,6 +61,56 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/ResponseStringOK"
+        "400":
+          $ref: "#/components/responses/ResponseBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
+
+  /security:
+    post:
+      summary: Upload custom SSL certificate
+      operationId: uploadSSLCertificate
+      tags:
+        - Security methods
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DomainCertificateConfig"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseOK"
+        "400":
+          $ref: "#/components/responses/ResponseBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
+
+    put:
+      summary: Enable/disable HTTPS with auto-signed certificate
+      operationId: toggleAutoSignedHTTPS
+      tags:
+        - Security methods
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutoSignedCertificateConfig"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseOK"
+        "400":
+          $ref: "#/components/responses/ResponseBadRequest"
+        "500":
+          $ref: "#/components/responses/ResponseInternalServerError"
+
+    get:
+      summary: Get HTTPS status
+      operationId: getHTTPSStatus
+      tags:
+        - Security methods
+      responses:
+        "200":
+          $ref: "#/components/responses/ResponseHTTPSStatus"
         "400":
           $ref: "#/components/responses/ResponseBadRequest"
         "500":
@@ -98,6 +156,13 @@ components:
               - $ref: "#/components/schemas/BaseResponse"
           example:
             message: "Internal Server Error"
+    ResponseHTTPSStatus:
+      description: HTTPS status information
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HTTPSStatus"
+
   schemas:
     BaseResponse:
       properties:
@@ -114,3 +179,82 @@ components:
             data:
               type: string
               description: When the interface returns success, this field is the specific success information
+
+    Certificate:
+      type: object
+      properties:
+        primaryDomain:
+          type: string
+          description: Primary domain name
+        otherDomains:
+          type: array
+          items:
+            type: string
+          description: Other domain names
+        commonName:
+          type: string
+          description: Common name
+        organization:
+          type: string
+          description: Organization
+        effectiveTime:
+          type: string
+          description: Effective time
+        expirationDate:
+          type: string
+          description: Expire time
+        type:
+          type: string
+          description: Type
+          example: "self-signed CA"
+        certificate:
+          type: string
+          description: PEM-encoded certificate
+        privateKey:
+          type: string
+          description: PEM-encoded private key
+
+    AutoSignedCertificateConfig:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether to enable auto-signed certificates
+      required:
+        - enabled
+
+    DomainCertificateConfig:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: Domain name for the certificate
+        certificate:
+          type: string
+          description: PEM-encoded certificate
+        privateKey:
+          type: string
+          description: PEM-encoded private key
+      required:
+        - domain
+        - certificate
+        - privateKey
+
+    HTTPSStatus:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether HTTPS is enabled
+        autoHTTPS:
+          type: boolean
+          description: Whether auto-signed HTTPS is enabled
+        certificate:
+          $ref: "#/components/schemas/Certificate"
+        domain:
+          type: string
+          nullable: true
+          description: Certificate domain name if using custom certificate
+      required:
+        - enabled
+        - autoHTTPS
