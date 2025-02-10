@@ -27,6 +27,11 @@ func (c *State) SetGatewayPort(port string) (err error) {
 	return c.notifyOnGatewayPortChange(port)
 }
 
+func (c *State) GetGatewayDomain() string {
+	// TODO
+	return c.gatewayPort
+}
+
 func (c *State) GetGatewayPort() string {
 	return c.gatewayPort
 }
