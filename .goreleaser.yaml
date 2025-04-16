@@ -73,6 +73,24 @@ builds:
       - arm
     goarm:
       - "7"
+  - id: casaos-gateway-riscv64
+    binary: build/sysroot/usr/bin/casaos-gateway
+    env:
+      - CC=riscv64-linux-gnu-gcc
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -s
+      - -w
+      - -extldflags "-static"
+    tags:
+      - musl
+      - netgo
+      - osusergo
+    goos:
+      - linux
+    goarch:
+      - riscv64
   - id: casaos-gateway-migration-tool-amd64
     binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
     hooks:
@@ -141,6 +159,25 @@ builds:
       - arm
     goarm:
       - "7"
+  - id: casaos-gateway-migration-tool-riscv64
+    binary: build/sysroot/usr/bin/casaos-gateway-migration-tool
+    main: ./cmd/migration-tool
+    env:
+      - CC=riscv64-linux-gnu-gcc
+    ldflags:
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+      - -s
+      - -w
+      - -extldflags "-static"
+    tags:
+      - musl
+      - netgo
+      - osusergo
+    goos:
+      - linux
+    goarch:
+      - riscv64
 archives:
   - name_template: >-
       {{ .Os }}-{{- if eq .Arch "arm" }}arm-7{{- else }}{{ .Arch }}{{- end }}-{{ .ProjectName }}-v{{ .Version }}
@@ -149,6 +186,7 @@ archives:
       - casaos-gateway-amd64
       - casaos-gateway-arm64
       - casaos-gateway-arm-7
+      - casaos-gateway-riscv64
     files:
       - build/**/*
   - name_template: >-
@@ -158,6 +196,7 @@ archives:
       - casaos-gateway-migration-tool-amd64
       - casaos-gateway-migration-tool-arm64
       - casaos-gateway-migration-tool-arm-7
+      - casaos-gateway-migration-tool-riscv64
     files:
       - build/sysroot/etc/**/*
 checksum:
