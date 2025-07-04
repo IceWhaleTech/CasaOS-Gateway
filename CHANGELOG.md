@@ -1,3 +1,6 @@
+## unreleased
+- build配下にリネーム漏れのファイルが存在したのを修正
+
 ## v0.4.15-alpha1-cs1.1.1
 - Updated references from "CasaOS" to "CassetteOS" in comments and documentation
 - Bumped cassetteos-common module version to include related reference updates
