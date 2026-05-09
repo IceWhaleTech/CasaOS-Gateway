@@ -4,6 +4,8 @@ type State struct {
 	gatewayPort         string
 	onGatewayPortChange []func(string) error
 
+	gatewayAddress string
+
 	runtimePath string
 	wwwPath     string
 }
@@ -12,6 +14,8 @@ func NewState() *State {
 	return &State{
 		gatewayPort:         "",
 		onGatewayPortChange: make([]func(string) error, 0),
+
+		gatewayAddress: "",
 
 		runtimePath: "",
 		wwwPath:     "",
@@ -29,6 +33,15 @@ func (c *State) SetGatewayPort(port string) (err error) {
 
 func (c *State) GetGatewayPort() string {
 	return c.gatewayPort
+}
+
+func (c *State) SetGatewayAddress(address string) error {
+	c.gatewayAddress = address
+	return nil
+}
+
+func (c *State) GetGatewayAddress() string {
+	return c.gatewayAddress
 }
 
 // Add func `f` to the stack. The stack of funcs will be called, in reverse order, when there is request to change the port.

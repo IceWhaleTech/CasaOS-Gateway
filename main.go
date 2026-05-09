@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	// Required for `//go:embed` of `gateway.ini.sample`.
 	_ "embed"
 	"errors"
 	"flag"
@@ -46,6 +47,8 @@ var (
 	_confSample string
 )
 
+const gatewayURLFilename = "gateway.url"
+
 func init() {
 	versionFlag := flag.Bool("v", false, "version")
 	wwwPathFlag := flag.String("w", filepath.Join(constants.DefaultDataPath, "www"), "www path")
@@ -63,20 +66,18 @@ func init() {
 
 	// create default config file if not exist
 	ConfigFilePath := filepath.Join(constants.DefaultConfigPath, common.GatewayName+"."+common.GatewayConfigType)
-	if _, err := os.Stat(ConfigFilePath); os.IsNotExist(err) {
-		fmt.Println("config file not exist, create it")
-		// create config file
-		file, err := os.Create(ConfigFilePath)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
+	if err := os.MkdirAll(filepath.Dir(ConfigFilePath), 0o755); err != nil {
+		panic(err)
+	}
 
-		// write default config
-		_, err = file.WriteString(_confSample)
-		if err != nil {
+	file, err := os.OpenFile(ConfigFilePath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err == nil {
+		defer file.Close()
+		if _, err := file.WriteString(_confSample); err != nil {
 			panic(err)
 		}
+	} else if !errors.Is(err, os.ErrExist) {
+		panic(err)
 	}
 
 	config, err := common.LoadConfig()
@@ -99,6 +100,12 @@ func init() {
 	gatewayPort := config.GetString(common.ConfigKeyGatewayPort)
 	if err := _state.SetGatewayPort(gatewayPort); err != nil {
 		logger.Error("Failed to set gateway port", zap.Any("error", err), zap.Any(common.ConfigKeyGatewayPort, gatewayPort))
+		panic(err)
+	}
+
+	gatewayAddress := config.GetString(common.ConfigKeyGatewayAddr)
+	if err := _state.SetGatewayAddress(gatewayAddress); err != nil {
+		logger.Error("Failed to set gateway address", zap.Any("error", err), zap.Any(common.ConfigKeyGatewayAddr, gatewayAddress))
 		panic(err)
 	}
 
@@ -127,7 +134,7 @@ func main() {
 
 	defer cleanupFiles(
 		_state.GetRuntimePath(),
-		pidFilename, external.ManagementURLFilename, external.StaticURLFilename,
+		pidFilename, external.ManagementURLFilename, external.StaticURLFilename, gatewayURLFilename,
 	)
 
 	defer func() {
@@ -139,6 +146,7 @@ func main() {
 	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	kill := make(chan os.Signal, 1)
 	signal.Notify(kill, syscall.SIGTERM, syscall.SIGINT)
 
@@ -268,10 +276,10 @@ func run(
 				}
 
 				_state.OnGatewayPortChange(func(port string) error {
-					return reloadGateway(port, route)
+					return reloadGateway(_state.GetGatewayAddress(), port, route)
 				})
 
-				if err := reloadGateway(_state.GetGatewayPort(), route); err != nil {
+				if err := reloadGateway(_state.GetGatewayAddress(), _state.GetGatewayPort(), route); err != nil {
 					return err
 				}
 
@@ -318,8 +326,8 @@ func run(
 	})
 }
 
-func reloadGateway(port string, route *http.ServeMux) error {
-	listener, err := net.Listen("tcp", net.JoinHostPort("", port))
+func reloadGateway(address, port string, route *http.ServeMux) error {
+	listener, err := net.Listen("tcp", net.JoinHostPort(address, port))
 	if err != nil {
 		return err
 	}
@@ -352,6 +360,10 @@ func reloadGateway(port string, route *http.ServeMux) error {
 	// test if gateway is running
 	url := "http://" + addr + "/ping"
 	if err := checkURLWithRetry(url, 10); err != nil {
+		return err
+	}
+
+	if _, err := writeAddressFile(_state.GetRuntimePath(), gatewayURLFilename, net.JoinHostPort(address, port)); err != nil {
 		return err
 	}
 
@@ -411,7 +423,7 @@ func writePidFile(runtimePath string) (string, error) {
 	return filename, os.WriteFile(filepath, []byte(fmt.Sprintf("%d", os.Getpid())), 0o600)
 }
 
-func writeAddressFile(runtimePath string, filename string, address string) (string, error) {
+func writeAddressFile(runtimePath, filename, address string) (string, error) {
 	err := os.MkdirAll(runtimePath, 0o755)
 	if err != nil {
 		return "", err

@@ -19,7 +19,17 @@ $HOME/.casaos/gateway.ini
 /etc/casaos/gateway.ini
 ```
 
-See [gateway.ini.sample](./build/etc/casaos/gateway.ini.sample) for default configuration.
+See [gateway.ini.sample](./build/sysroot/etc/casaos/gateway.ini.sample) for default configuration.
+
+To bind the gateway to a specific interface/IP, set `address` under the `[gateway]` section. Leaving `address` empty keeps the existing behavior (bind to all interfaces).
+
+Example:
+
+```ini
+[gateway]
+port=8080
+address=10.1.1.5
+```
 
 ## Running
 
@@ -27,7 +37,7 @@ Once running, gateway address and management address will be available in the fi
 
 ```bash
 $ cat /var/run/casaos/gateway.url 
-[::]:8080 # port is specified in configuration
+10.1.1.5:8080 # address/port are specified in configuration
 
 $ cat /var/run/casaos/management.url 
 [::]:34703 # port is randomly assigned
