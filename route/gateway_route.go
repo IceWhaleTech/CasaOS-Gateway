@@ -1,6 +1,7 @@
 package route
 
 import (
+	"net"
 	"net/http"
 	"strings"
 
@@ -34,13 +35,11 @@ func rewriteRequestSourceIP(r *http.Request) {
 
 	// when r.Header.Get("X-Forwarded-For") is "". the ipList should be empty.
 	// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
-	if r.Header.Get("X-Forwarded-For") != "" {
-		ipList = strings.Split(r.Header.Get("X-Forwarded-For"), ",")
-
-		// when r.Header.Get("X-Forwarded-For") is "". to clean the ipList.
-		// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
-		if len(ipList) == 1 && ipList[0] == "" {
-			ipList = []string{}
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		for _, rawIP := range strings.Split(xff, ",") {
+			if ip := strings.TrimSpace(rawIP); ip != "" {
+				ipList = append(ipList, ip)
+			}
 		}
 	}
 
@@ -49,7 +48,10 @@ func rewriteRequestSourceIP(r *http.Request) {
 
 	// Note: the X-Forwarded-For depend the correct config from reverse proxy.
 	// otherwise the X-Forwarded-For may be empty.
-	remoteIP := r.RemoteAddr[:strings.LastIndex(r.RemoteAddr, ":")]
+	remoteIP := r.RemoteAddr
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		remoteIP = host
+	}
 	if len(ipList) > 0 && (remoteIP == "127.0.0.1" || remoteIP == "::1") {
 		// to process the request from reverse proxy
 
