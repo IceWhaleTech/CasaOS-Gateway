@@ -1,6 +1,7 @@
 package route
 
 import (
+	"net"
 	"net/http"
 	"strings"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/IceWhaleTech/CasaOS-Gateway/service"
 	"go.uber.org/zap"
 )
+
+const headerXForwardedFor = "X-Forwarded-For"
 
 type GatewayRoute struct {
 	management *service.Management
@@ -34,29 +37,30 @@ func rewriteRequestSourceIP(r *http.Request) {
 
 	// when r.Header.Get("X-Forwarded-For") is "". the ipList should be empty.
 	// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
-	if r.Header.Get("X-Forwarded-For") != "" {
-		ipList = strings.Split(r.Header.Get("X-Forwarded-For"), ",")
-
-		// when r.Header.Get("X-Forwarded-For") is "". to clean the ipList.
-		// fix https://github.com/IceWhaleTech/CasaOS/issues/1247
-		if len(ipList) == 1 && ipList[0] == "" {
-			ipList = []string{}
+	if xff := r.Header.Get(headerXForwardedFor); xff != "" {
+		for _, rawIP := range strings.Split(xff, ",") {
+			if ip := strings.TrimSpace(rawIP); ip != "" {
+				ipList = append(ipList, ip)
+			}
 		}
 	}
 
-	r.Header.Del("X-Forwarded-For")
+	r.Header.Del(headerXForwardedFor)
 	r.Header.Del("X-Real-IP")
 
 	// Note: the X-Forwarded-For depend the correct config from reverse proxy.
 	// otherwise the X-Forwarded-For may be empty.
-	remoteIP := r.RemoteAddr[:strings.LastIndex(r.RemoteAddr, ":")]
+	remoteIP := r.RemoteAddr
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		remoteIP = host
+	}
 	if len(ipList) > 0 && (remoteIP == "127.0.0.1" || remoteIP == "::1") {
 		// to process the request from reverse proxy
 
 		// in reverse proxy, X-Forwarded-For will container multiple IPs.
 		// if the request is from reverse proxy, the r.RemoteAddr will be 127.0.0.1.
 		// So we need get ip from X-Forwarded-For
-		r.Header.Add("X-Forwarded-For", ipList[len(ipList)-1])
+		r.Header.Add(headerXForwardedFor, ipList[len(ipList)-1])
 	}
 	// to process the request from client.
 	// the gateway will add the X-Forwarded-For to request header.
